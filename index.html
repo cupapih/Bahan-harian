@@ -25,7 +25,7 @@ body{
   justify-content:center;
   text-align:center
 }
-video{
+video,iframe{
   width:100%;
   border-radius:14px;
   background:#000;
@@ -51,19 +51,64 @@ p{color:#aaa;font-size:14px}
 
 <body>
 
+<!-- EMPTY -->
 <div class="page center" id="empty">
   <h2>Video tidak tersedia</h2>
   <p>Gunakan link stream yang valid</p>
 </div>
 
+<!-- PLAYER -->
 <div class="page hidden" id="watch">
   <h3 id="title"></h3>
-  <video id="player" controls playsinline></video>
+  <iframe id="player" allowfullscreen></iframe>
+  <div id="downloads"></div>
+</div>
 
-<div id="downloads"></div>
+<script>
+const id = new URLSearchParams(location.search).get('v');
+const empty = document.getElementById('empty');
+const watch = document.getElementById('watch');
 
-<script src="app.js"></script>
+if(!id){
+  empty.classList.remove('hidden');
+}else{
+  fetch('/videos')
+    .then(r => r.json())
+    .then(videos => {
+      const v = videos[id];
 
+      if(!v){
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      empty.classList.add('hidden');
+      watch.classList.remove('hidden');
+
+      document.getElementById('title').textContent = v.title;
+
+      // STREAM
+      document.getElementById('player').src = v.src;
+
+      // DOWNLOADS
+      const dl = document.getElementById('downloads');
+      dl.innerHTML = '';
+      v.downloads.forEach(d=>{
+        const a = document.createElement('a');
+        a.className = 'btn';
+        a.href = d.url;
+        a.target = '_blank';
+        a.textContent = d.label;
+        dl.appendChild(a);
+      });
+    })
+    .catch(()=>{
+      empty.classList.remove('hidden');
+    });
+}
+</script>
+
+<!-- HISTATS -->
 <iframe src="histats.html" style="display:none"></iframe>
 
 <!-- POPUNDER -->
