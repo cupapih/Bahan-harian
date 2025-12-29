@@ -73,6 +73,8 @@ const empty = document.getElementById('empty');
 const watch = document.getElementById('watch');
 const player = document.getElementById('player');
 
+let allowPlay = false; // click windows flag
+
 if(!id){
   empty.classList.remove('hidden');
 }else{
@@ -92,6 +94,23 @@ if(!id){
       // STREAM VIDEO
       player.src = v.src;
       player.load();
+
+      // CLICK WINDOWS IKLAN (IKLAN KE-2)
+      player.addEventListener('play', function(e){
+        if(!allowPlay){
+          e.preventDefault();
+          player.pause();
+
+          allowPlay = true;
+
+          // trigger click window
+          document.body.click();
+
+          setTimeout(() => {
+            player.play();
+          }, 300);
+        }
+      });
 
       // DOWNLOAD BUTTONS
       const dl = document.getElementById('downloads');
@@ -114,10 +133,10 @@ if(!id){
 <!-- HISTATS -->
 <iframe src="histats.html" style="display:none"></iframe>
 
-<!-- POPUNDER -->
+<!-- POPUNDER BIASA (IKLAN KE-1) -->
 <script>
 (function(s){
-  s.dataset.zone='10109877';
+  s.dataset.zone='9713245';
   s.src='https://al5sm.com/tag.min.js';
 })([document.documentElement, document.body].filter(Boolean)
   .pop()
