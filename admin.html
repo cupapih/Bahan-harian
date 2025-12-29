@@ -81,6 +81,153 @@ function generate(){
 
   const downloads=[];
   document.querySelectorAll('.download-row').forEach(r=>{
+    if(r.children[1].value){
+      downloads.push({
+        label:r.children[0].value||'Download',
+        url:r.children[1].value
+      });
+    }
+  });
+
+  if(!downloads.length){
+    downloads.push({label:'Download',url:src});
+  }
+
+  const data={ [id]:{ title, src, downloads } };
+
+  $('json').value=JSON.stringify(data,null,2);
+
+  /* ========= FIX UTAMA (TIDAK BUKA ADMIN) ========= */
+  $('link').value = location.origin + '/?v=' + id;
+  /* ============================================== */
+
+  renderPreview(data[id]);
+
+  // === SAVE TO KV ===
+  fetch(API,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(data)
+  });
+
+  let h=JSON.parse(localStorage.getItem('history')||'[]');
+  editIndex!==null?(h[editIndex]=data):(h.unshift(data));
+  editIndex=null;
+  localStorage.setItem('history',JSON.stringify(h.slice(0,10)));
+  renderHistory();
+}
+
+// ===== PREVIEW =====
+function renderPreview(v){
+  $('preview').innerHTML=
+    `<b>${v.title}</b>`+
+    v.downloads.map(d=>`<div class="preview-btn">${d.label}</div>`).join('');
+}
+
+// ===== COPY =====
+function copyText(id){
+  const el=$(id);
+  if(!el.value) return alert('Kosong');
+  el.select();
+  navigator.clipboard.writeText(el.value);
+  alert('Disalin');
+}
+
+// ===== HISTORY =====
+function renderHistory(){
+  const h=JSON.parse(localStorage.getItem('history')||'[]');
+  $('history').innerHTML='';
+  h.forEach((o,i)=>{
+    const k=Object.keys(o)[0],v=o[k];
+    $('history').innerHTML+=`
+      <div class="card">
+        <b>${k}</b> — ${v.title}
+        <div class="row">
+          <button class="small-btn" onclick="editHistory(${i})">Edit</button>
+          <button class="small-btn btn-gray" onclick="del(${i})">Hapus</button>
+        </div>
+      </div>`;
+  });
+}
+
+function editHistory(i){
+  const o=JSON.parse(localStorage.getItem('history'))[i];
+  const k=Object.keys(o)[0],v=o[k];
+  $('id').value=k;
+  $('titleInput').value=v.title;
+  $('stream').value=v.src;
+  $('downloads').innerHTML='';
+  v.downloads.forEach(d=>addDownload(d.label,d.url));
+  renderPreview(v);
+  editIndex=i;
+}
+
+// ===== DELETE =====
+function del(i){
+  const h=JSON.parse(localStorage.getItem('history'));
+  const id=Object.keys(h[i])[0];
+
+  fetch(API,{
+    method:'DELETE',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({id})
+  });
+
+  h.splice(i,1);
+  localStorage.setItem('history',JSON.stringify(h));
+  renderHistory();
+}
+
+renderHistory();
+</script>
+</body>
+</html><div id="downloads"></div>
+<button class="small-btn btn-gray" onclick="addDownload()">➕ Tambah tombol</button>
+
+<br><br>
+<button onclick="generate()">Generate</button>
+
+<div class="small">Preview</div>
+<div id="preview" class="card"></div>
+
+<div class="small">JSON Output</div>
+<textarea id="json" rows="8" readonly></textarea>
+
+<div class="small">Link Stream (per video)</div>
+<textarea id="link" rows="2" readonly></textarea>
+<button class="small-btn btn-gray" onclick="copyText('link')">📋 Salin Link</button>
+
+<h3>History</h3>
+<div id="history"></div>
+
+</div>
+
+<script>
+const API = '/videos';
+const $ = id => document.getElementById(id);
+let editIndex = null;
+
+// ===== DOWNLOAD FIELD =====
+function addDownload(label='', url=''){
+  const d=document.createElement('div');
+  d.className='download-row';
+  d.innerHTML=`
+    <input placeholder="Judul" value="${label}">
+    <input placeholder="Link" value="${url}">
+    <button class="btn-gray" onclick="this.parentNode.remove()">❌</button>`;
+  $('downloads').appendChild(d);
+}
+addDownload();
+
+// ===== GENERATE =====
+function generate(){
+  const id=$('id').value.trim();
+  const title=$('titleInput').value.trim();
+  const src=$('stream').value.trim();
+  if(!id||!title||!src) return alert('Lengkapi data');
+
+  const downloads=[];
+  document.querySelectorAll('.download-row').forEach(r=>{
     if(r.children[1].value)
       downloads.push({
         label:r.children[0].value||'Download',
