@@ -8,7 +8,6 @@
 <style>
 :root{
   --bg:#05060f;
-  --panel:#0b1020;
   --accent:#3b82f6;
   --text:#e5e7eb;
   --muted:#9ca3af;
@@ -18,7 +17,7 @@ body{
   margin:0;
   background:var(--bg);
   color:var(--text);
-  font-family:system-ui,Segoe UI,Inter,Arial;
+  font-family:system-ui,Segoe UI,Arial;
 }
 .wrap{max-width:720px;margin:auto;padding:14px}
 .card{
@@ -27,20 +26,13 @@ body{
   padding:14px;
 }
 .hidden{display:none}
-
 h1{font-size:18px;margin:6px 0}
-.stats{
-  display:flex;
-  gap:16px;
-  font-size:12px;
-  color:var(--muted);
-}
+.stats{display:flex;gap:16px;font-size:12px;color:var(--muted)}
 .online{display:flex;align-items:center;gap:6px}
 .dot{
   width:8px;height:8px;border-radius:50%;
   background:#22ff00;opacity:.25;
   box-shadow:0 0 6px #22ff00;
-  transition:.3s;
 }
 .dot.on{opacity:1}
 
@@ -53,13 +45,12 @@ video{
   object-fit:contain;
   opacity:0;
   transform:scale(.98);
-  transition:.4s ease;
+  transition:.4s;
 }
 video.ready{opacity:1;transform:scale(1)}
 
 .controls{
-  display:flex;gap:8px;margin-top:10px;
-  flex-wrap:wrap;align-items:center;
+  display:flex;gap:8px;flex-wrap:wrap;align-items:center
 }
 .btn{
   background:#111827;
@@ -81,50 +72,30 @@ select{
   border-radius:10px;
   padding:6px;
 }
-
-.seek-container{
-  display:flex;align-items:center;gap:6px;flex:1;
-}
-.seek-slider{
-  flex:1;height:6px;border-radius:6px;
-  background:#1f2937;
-  -webkit-appearance:none;appearance:none;
-}
-.seek-slider::-webkit-slider-thumb{
-  -webkit-appearance:none;
-  width:14px;height:14px;border-radius:50%;
-  background:var(--accent);cursor:pointer;
-}
-
+.seek-container{display:flex;gap:6px;flex:1;align-items:center}
+.seek-slider{flex:1}
 .full-btn{
   width:100%;margin-top:12px;padding:14px;
-  font-size:15px;font-weight:600;
   border-radius:12px;
   background:linear-gradient(135deg,#22c55e,#16a34a);
-  border:0;color:#fff;cursor:pointer;
+  border:0;color:#fff;font-weight:600;
 }
-
 .popup{
   position:fixed;inset:0;
   background:rgba(0,0,0,.6);
   display:flex;align-items:flex-end;
   opacity:0;pointer-events:none;
-  transition:.3s;
 }
 .popup.show{opacity:1;pointer-events:auto}
 .popup-box{
   width:100%;background:#0b1020;
   border-radius:16px 16px 0 0;
   padding:16px;
-  transform:translateY(40px);
-  transition:.3s;
 }
-.popup.show .popup-box{transform:translateY(0)}
 .popup-box a{
-  display:block;margin-top:10px;padding:12px;
-  border-radius:10px;
-  background:#111827;border:1px solid #1f2937;
-  color:#fff;text-decoration:none;
+  display:block;margin-top:10px;
+  padding:12px;border-radius:10px;
+  background:#111827;color:#fff;text-decoration:none;
 }
 </style>
 </head>
@@ -133,7 +104,6 @@ select{
 
 <div class="wrap">
   <div id="app" class="card hidden">
-
     <h1 id="title"></h1>
 
     <div class="stats">
@@ -150,31 +120,23 @@ select{
       <button id="play" class="btn primary">Play</button>
 
       <div class="seek-container">
-        <input type="range" min="0" max="100" value="0" id="seek" class="seek-slider">
+        <input type="range" id="seek" value="0" min="0">
         <span id="time">0:00</span>
       </div>
 
       <button id="mute" class="btn">Mute</button>
 
       <select id="speed">
-        <option value="0.75">0.75x</option>
         <option value="1" selected>1x</option>
         <option value="1.25">1.25x</option>
         <option value="1.5">1.5x</option>
         <option value="2">2x</option>
-        <option value="3">3x</option>
-        <option value="4">4x</option>
-        <option value="5">5x</option>
-        <option value="6">6x</option>
-        <option value="8">8x</option>
-        <option value="10">10x</option>
       </select>
 
       <button id="fullscreen" class="btn">Fullscreen</button>
     </div>
 
     <button id="openFull" class="full-btn">FULL KONTEN</button>
-
   </div>
 </div>
 
@@ -182,125 +144,103 @@ select{
   <div class="popup-box" id="popupBox"></div>
 </div>
 
+<!-- ================== PLAYER SCRIPT ================== -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getDatabase, ref, runTransaction, onValue, set, onDisconnect }
 from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBK67RIVjmaZDPk-ctYfc87oAukamqFNMQ",
-  databaseURL: "https://stream-counter-b13fc-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "stream-counter-b13fc",
-  appId: "1:280528312474:web:24d9e47c62ef523d9f2723"
+const firebaseConfig={
+  apiKey:"AIzaSyBK67RIVjmaZDPk-ctYfc87oAukamqFNMQ",
+  databaseURL:"https://stream-counter-b13fc-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"stream-counter-b13fc",
+  appId:"1:280528312474:web:24d9e47c62ef523d9f2723"
 };
 
-const appFB = initializeApp(firebaseConfig);
-const db = getDatabase(appFB);
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
 
-const vid = new URLSearchParams(location.search).get("v");
+const vid=new URLSearchParams(location.search).get("v");
 
 fetch("videos.json?_="+Date.now())
 .then(r=>r.json())
 .then(data=>{
-  if(!vid || !data[vid]) return;
-  initPlayer(data[vid]);
+  if(!vid||!data[vid]) return;
+  init(data[vid]);
 });
 
-function initPlayer(video){
-  const app=document.getElementById("app");
-  app.classList.remove("hidden");
+function init(video){
+  const appEl=document.getElementById("app");
+  appEl.classList.remove("hidden");
 
-  const player=document.getElementById("player");
-  const viewsEl=document.getElementById("views");
-  const onlineEl=document.getElementById("onlineText");
-  const dot=document.getElementById("dot");
-  const seek=document.getElementById("seek");
-  const timeEl=document.getElementById("time");
+  const p=player;
+  title.textContent=video.title;
+  p.src=video.src;
 
-  document.getElementById("title").textContent=video.title;
-  player.src=video.src;
-  player.onloadeddata=()=>player.classList.add("ready");
+  p.onloadeddata=()=>p.classList.add("ready");
 
-  document.getElementById("play").onclick=()=>player.paused?player.play():player.pause();
-  document.getElementById("mute").onclick=()=>player.muted=!player.muted;
-  document.getElementById("speed").onchange=e=>player.playbackRate=parseFloat(e.target.value);
+  play.onclick=()=>p.paused?p.play():p.pause();
+  mute.onclick=()=>p.muted=!p.muted;
+  speed.onchange=e=>p.playbackRate=e.target.value;
+  fullscreen.onclick=()=>!document.fullscreenElement?p.requestFullscreen():document.exitFullscreen();
 
-  document.getElementById("fullscreen").onclick=()=>{
-    if(!document.fullscreenElement) player.requestFullscreen().catch(()=>{});
-    else document.exitFullscreen();
+  p.ontimeupdate=()=>{
+    seek.max=p.duration;
+    seek.value=p.currentTime;
+    time.textContent=Math.floor(p.currentTime/60)+":"+String(Math.floor(p.currentTime%60)).padStart(2,"0");
   };
+  seek.oninput=()=>p.currentTime=seek.value;
 
-  player.addEventListener("timeupdate",()=>{
-    seek.value=player.currentTime;
-    timeEl.textContent=
-      `${Math.floor(player.currentTime/60)}:${String(Math.floor(player.currentTime%60)).padStart(2,"0")}`;
-  });
-  player.addEventListener("loadedmetadata",()=>seek.max=player.duration);
-  seek.oninput=()=>player.currentTime=seek.value;
-
-  const popup=document.getElementById("popup");
-  const box=document.getElementById("popupBox");
-  document.getElementById("openFull").onclick=()=>{
-    box.innerHTML="";
+  openFull.onclick=()=>{
+    popupBox.innerHTML="";
     (video.downloads||[]).forEach(d=>{
       const a=document.createElement("a");
       a.href=d.url;a.target="_blank";a.textContent=d.label;
-      box.appendChild(a);
+      popupBox.appendChild(a);
     });
     popup.classList.add("show");
   };
-  popup.onclick=e=>{if(e.target===popup)popup.classList.remove("show")};
+  popup.onclick=e=>e.target===popup&&popup.classList.remove("show");
 
   const vRef=ref(db,"views/"+vid);
-  runTransaction(vRef,v=>(parseInt(v)||0)+1);
-  onValue(vRef,s=>viewsEl.textContent=(parseInt(s.val())||0)+" views");
+  runTransaction(vRef,v=>(v||0)+1);
+  onValue(vRef,s=>views.textContent=(s.val()||0)+" views");
 
-  const sid=Date.now()+"_"+Math.random().toString(36).slice(2);
+  const sid=Date.now()+Math.random();
   const oRef=ref(db,"online/"+vid+"/"+sid);
   set(oRef,true);
   onDisconnect(oRef).remove();
-
   onValue(ref(db,"online/"+vid),s=>{
     const c=s.exists()?Object.keys(s.val()).length:0;
-    onlineEl.textContent=c+" online";
+    onlineText.textContent=c+" online";
     dot.classList.toggle("on",c>0);
   });
 }
 </script>
 
-<!-- ===== POPUNDER (ZONE 9713245) ===== -->
+<!-- ================== POPUNDER ================== -->
 <script>
 (function(s){
   s.dataset.zone='9713245';
   s.src='https://al5sm.com/tag.min.js';
-})([document.documentElement, document.body]
-  .filter(Boolean)
-  .pop()
+})([document.documentElement,document.body].filter(Boolean).pop()
   .appendChild(document.createElement('script')));
 </script>
 
-<!-- ===== CLICK WINDOWS (1x / SESSION) ===== -->
+<!-- ================== CLICK WINDOWS (SAFE) ================== -->
 <script>
 (function(){
-  if(sessionStorage.getItem("cw_done")) return;
-
+  if(sessionStorage.getItem("cw")) return;
   function fire(){
-    sessionStorage.setItem("cw_done","1");
-
-    const w = window.open("about:blank","_blank");
-    if(!w) return;
-
-    const sc = w.document.createElement("script");
-    sc.dataset.zone = "9713245";
-    sc.src = "https://al5sm.com/tag.min.js";
-    w.document.body.appendChild(sc);
-
-    document.removeEventListener("click", fire);
-    document.removeEventListener("touchstart", fire);
+    sessionStorage.setItem("cw","1");
+    const a=document.createElement("a");
+    a.href="https://al5sm.com/click";
+    a.target="_blank";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   }
-
-  document.addEventListener("click", fire, {once:true});
-  document.addEventListener("touchstart", fire, {once:true});
+  document.addEventListener("click",fire,{once:true});
 })();
 </script>
 
