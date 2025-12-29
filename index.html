@@ -1,247 +1,146 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
 <title>Stream</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-:root{
-  --bg:#05060f;
-  --accent:#3b82f6;
-  --text:#e5e7eb;
-  --muted:#9ca3af;
-}
 *{box-sizing:border-box}
 body{
   margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:system-ui,Segoe UI,Arial;
+  background:#0b0b0b;
+  color:#f1f1f1;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif
 }
-.wrap{max-width:720px;margin:auto;padding:14px}
-.card{
-  background:linear-gradient(180deg,#0b1020,#060814);
-  border-radius:14px;
-  padding:14px;
+.page{
+  max-width:480px;
+  margin:auto;
+  padding:16px
 }
-.hidden{display:none}
-h1{font-size:18px;margin:6px 0}
-.stats{display:flex;gap:16px;font-size:12px;color:var(--muted)}
-.online{display:flex;align-items:center;gap:6px}
-.dot{
-  width:8px;height:8px;border-radius:50%;
-  background:#22ff00;opacity:.25;
-  box-shadow:0 0 6px #22ff00;
+.center{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  text-align:center
 }
-.dot.on{opacity:1}
-
 video{
   width:100%;
+  height:auto;
   max-height:80vh;
   border-radius:14px;
   background:#000;
   margin:12px 0;
   object-fit:contain;
-  opacity:0;
-  transform:scale(.98);
-  transition:.4s;
 }
-video.ready{opacity:1;transform:scale(1)}
-
-.controls{
-  display:flex;gap:8px;flex-wrap:wrap;align-items:center
-}
+h2,h3{margin:8px 0;font-weight:600}
+p{color:#aaa;font-size:14px}
 .btn{
-  background:#111827;
-  border:1px solid #1f2937;
+  display:block;
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  background:linear-gradient(135deg,#ff0055,#ff3c7d);
   color:#fff;
-  padding:8px 12px;
-  border-radius:10px;
-  cursor:pointer;
-  font-size:13px;
+  text-align:center;
+  text-decoration:none;
+  border-radius:14px;
+  font-weight:600
 }
-.btn.primary{
-  background:linear-gradient(135deg,var(--accent),#2563eb);
-  border:0;
-}
-select{
-  background:#111827;
-  color:#fff;
-  border:1px solid #1f2937;
-  border-radius:10px;
-  padding:6px;
-}
-.seek-container{display:flex;gap:6px;flex:1;align-items:center}
-.seek-slider{flex:1}
-.full-btn{
-  width:100%;margin-top:12px;padding:14px;
-  border-radius:12px;
-  background:linear-gradient(135deg,#22c55e,#16a34a);
-  border:0;color:#fff;font-weight:600;
-}
-.popup{
-  position:fixed;inset:0;
-  background:rgba(0,0,0,.6);
-  display:flex;align-items:flex-end;
-  opacity:0;pointer-events:none;
-}
-.popup.show{opacity:1;pointer-events:auto}
-.popup-box{
-  width:100%;background:#0b1020;
-  border-radius:16px 16px 0 0;
-  padding:16px;
-}
-.popup-box a{
-  display:block;margin-top:10px;
-  padding:12px;border-radius:10px;
-  background:#111827;color:#fff;text-decoration:none;
-}
+.hidden{display:none}
 </style>
 </head>
 
 <body>
 
-<div class="wrap">
-  <div id="app" class="card hidden">
-    <h1 id="title"></h1>
-
-    <div class="stats">
-      <div id="views">0 views</div>
-      <div class="online">
-        <div id="dot" class="dot"></div>
-        <span id="onlineText">0 online</span>
-      </div>
-    </div>
-
-    <video id="player" playsinline></video>
-
-    <div class="controls">
-      <button id="play" class="btn primary">Play</button>
-
-      <div class="seek-container">
-        <input type="range" id="seek" value="0" min="0">
-        <span id="time">0:00</span>
-      </div>
-
-      <button id="mute" class="btn">Mute</button>
-
-      <select id="speed">
-        <option value="1" selected>1x</option>
-        <option value="1.25">1.25x</option>
-        <option value="1.5">1.5x</option>
-        <option value="2">2x</option>
-      </select>
-
-      <button id="fullscreen" class="btn">Fullscreen</button>
-    </div>
-
-    <button id="openFull" class="full-btn">FULL KONTEN</button>
-  </div>
+<!-- EMPTY STATE -->
+<div class="page center hidden" id="empty">
+  <h2>Video tidak tersedia</h2>
+  <p>Gunakan link stream yang valid</p>
 </div>
 
-<div id="popup" class="popup">
-  <div class="popup-box" id="popupBox"></div>
+<!-- WATCH -->
+<div class="page hidden" id="watch">
+  <h3 id="title"></h3>
+  <video id="player" controls playsinline></video>
+  <div id="downloads"></div>
 </div>
 
-<!-- ================== PLAYER SCRIPT ================== -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getDatabase, ref, runTransaction, onValue, set, onDisconnect }
-from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+<script>
+const id = new URLSearchParams(location.search).get('v');
+const empty = document.getElementById('empty');
+const watch = document.getElementById('watch');
+const player = document.getElementById('player');
 
-const firebaseConfig={
-  apiKey:"AIzaSyBK67RIVjmaZDPk-ctYfc87oAukamqFNMQ",
-  databaseURL:"https://stream-counter-b13fc-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:"stream-counter-b13fc",
-  appId:"1:280528312474:web:24d9e47c62ef523d9f2723"
-};
+let allowPlay = false; // click windows flag
 
-const app=initializeApp(firebaseConfig);
-const db=getDatabase(app);
+if(!id){
+  empty.classList.remove('hidden');
+}else{
+  fetch('/videos')
+    .then(r => r.json())
+    .then(videos => {
+      const v = videos[id];
 
-const vid=new URLSearchParams(location.search).get("v");
+      if(!v){
+        empty.classList.remove('hidden');
+        return;
+      }
 
-fetch("videos.json?_="+Date.now())
-.then(r=>r.json())
-.then(data=>{
-  if(!vid||!data[vid]) return;
-  init(data[vid]);
-});
+      watch.classList.remove('hidden');
+      document.getElementById('title').textContent = v.title;
 
-function init(video){
-  const appEl=document.getElementById("app");
-  appEl.classList.remove("hidden");
+      // STREAM VIDEO
+      player.src = v.src;
+      player.load();
 
-  const p=player;
-  title.textContent=video.title;
-  p.src=video.src;
+      // CLICK WINDOWS IKLAN (IKLAN KE-2)
+      player.addEventListener('play', function(e){
+        if(!allowPlay){
+          e.preventDefault();
+          player.pause();
 
-  p.onloadeddata=()=>p.classList.add("ready");
+          allowPlay = true;
 
-  play.onclick=()=>p.paused?p.play():p.pause();
-  mute.onclick=()=>p.muted=!p.muted;
-  speed.onchange=e=>p.playbackRate=e.target.value;
-  fullscreen.onclick=()=>!document.fullscreenElement?p.requestFullscreen():document.exitFullscreen();
+          // trigger click window
+          document.body.click();
 
-  p.ontimeupdate=()=>{
-    seek.max=p.duration;
-    seek.value=p.currentTime;
-    time.textContent=Math.floor(p.currentTime/60)+":"+String(Math.floor(p.currentTime%60)).padStart(2,"0");
-  };
-  seek.oninput=()=>p.currentTime=seek.value;
+          setTimeout(() => {
+            player.play();
+          }, 300);
+        }
+      });
 
-  openFull.onclick=()=>{
-    popupBox.innerHTML="";
-    (video.downloads||[]).forEach(d=>{
-      const a=document.createElement("a");
-      a.href=d.url;a.target="_blank";a.textContent=d.label;
-      popupBox.appendChild(a);
+      // DOWNLOAD BUTTONS
+      const dl = document.getElementById('downloads');
+      dl.innerHTML = '';
+      v.downloads.forEach(d => {
+        const a = document.createElement('a');
+        a.className = 'btn';
+        a.href = d.url;
+        a.target = '_blank';
+        a.textContent = d.label;
+        dl.appendChild(a);
+      });
+    })
+    .catch(() => {
+      empty.classList.remove('hidden');
     });
-    popup.classList.add("show");
-  };
-  popup.onclick=e=>e.target===popup&&popup.classList.remove("show");
-
-  const vRef=ref(db,"views/"+vid);
-  runTransaction(vRef,v=>(v||0)+1);
-  onValue(vRef,s=>views.textContent=(s.val()||0)+" views");
-
-  const sid=Date.now()+Math.random();
-  const oRef=ref(db,"online/"+vid+"/"+sid);
-  set(oRef,true);
-  onDisconnect(oRef).remove();
-  onValue(ref(db,"online/"+vid),s=>{
-    const c=s.exists()?Object.keys(s.val()).length:0;
-    onlineText.textContent=c+" online";
-    dot.classList.toggle("on",c>0);
-  });
 }
 </script>
 
-<!-- ================== POPUNDER ================== -->
+<!-- HISTATS -->
+<iframe src="histats.html" style="display:none"></iframe>
+
+<!-- POPUNDER BIASA (IKLAN KE-1) -->
 <script>
 (function(s){
   s.dataset.zone='9713245';
   s.src='https://al5sm.com/tag.min.js';
-})([document.documentElement,document.body].filter(Boolean).pop()
+})([document.documentElement, document.body].filter(Boolean)
+  .pop()
   .appendChild(document.createElement('script')));
-</script>
-
-<!-- ================== CLICK WINDOWS (SAFE) ================== -->
-<script>
-(function(){
-  if(sessionStorage.getItem("cw")) return;
-  function fire(){
-    sessionStorage.setItem("cw","1");
-    const a=document.createElement("a");
-    a.href="https://al5sm.com/click";
-    a.target="_blank";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  }
-  document.addEventListener("click",fire,{once:true});
-})();
 </script>
 
 </body>
