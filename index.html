@@ -7,43 +7,76 @@
 
 <style>
 *{box-sizing:border-box}
-body{
+html,body{
   margin:0;
-  background:#0b0b0b;
-  color:#f1f1f1;
+  padding:0;
+  width:100%;
+  height:100%;
+  background:#000;
+  color:#fff;
   font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif
 }
-.page{
-  max-width:480px;
-  margin:auto;
-  padding:16px
-}
-.center{
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  text-align:center
-}
-video,iframe{
-  width:100%;
-  border-radius:14px;
+
+/* PLAYER FULLSCREEN */
+#player-wrap{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100vw;
+  height:100vh;
   background:#000;
-  margin:12px 0
+  z-index:1;
 }
-h2,h3{margin:8px 0;font-weight:600}
-p{color:#aaa;font-size:14px}
+
+/* VIDEO / IFRAME */
+#player{
+  width:100%;
+  height:100%;
+  border:none;
+  background:#000;
+}
+
+/* OVERLAY */
+#overlay{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  padding:14px;
+  background:linear-gradient(transparent,rgba(0,0,0,.85));
+  z-index:2;
+}
+
+/* TITLE */
+#title{
+  font-size:16px;
+  font-weight:600;
+  margin-bottom:8px;
+}
+
+/* DOWNLOAD BUTTON */
 .btn{
   display:block;
   width:100%;
   padding:12px;
-  margin-top:8px;
+  margin-top:6px;
   background:linear-gradient(135deg,#ff0055,#ff3c7d);
   color:#fff;
   text-align:center;
   text-decoration:none;
   border-radius:14px;
   font-weight:600
+}
+
+/* EMPTY STATE */
+#empty{
+  position:fixed;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  text-align:center;
+  padding:20px;
 }
 .hidden{display:none}
 </style>
@@ -52,22 +85,25 @@ p{color:#aaa;font-size:14px}
 <body>
 
 <!-- EMPTY -->
-<div class="page center" id="empty">
+<div id="empty" class="hidden">
   <h2>Video tidak tersedia</h2>
   <p>Gunakan link stream yang valid</p>
 </div>
 
-<!-- PLAYER -->
-<div class="page hidden" id="watch">
-  <h3 id="title"></h3>
+<!-- FULLSCREEN PLAYER -->
+<div id="player-wrap" class="hidden">
   <iframe id="player" allowfullscreen></iframe>
-  <div id="downloads"></div>
+
+  <div id="overlay">
+    <div id="title"></div>
+    <div id="downloads"></div>
+  </div>
 </div>
 
 <script>
 const id = new URLSearchParams(location.search).get('v');
 const empty = document.getElementById('empty');
-const watch = document.getElementById('watch');
+const wrap = document.getElementById('player-wrap');
 
 if(!id){
   empty.classList.remove('hidden');
@@ -76,35 +112,27 @@ if(!id){
     .then(r => r.json())
     .then(videos => {
       const v = videos[id];
-
       if(!v){
         empty.classList.remove('hidden');
         return;
       }
 
-      empty.classList.add('hidden');
-      watch.classList.remove('hidden');
-
+      wrap.classList.remove('hidden');
       document.getElementById('title').textContent = v.title;
-
-      // STREAM
       document.getElementById('player').src = v.src;
 
-      // DOWNLOADS
       const dl = document.getElementById('downloads');
-      dl.innerHTML = '';
+      dl.innerHTML='';
       v.downloads.forEach(d=>{
-        const a = document.createElement('a');
-        a.className = 'btn';
-        a.href = d.url;
-        a.target = '_blank';
-        a.textContent = d.label;
+        const a=document.createElement('a');
+        a.className='btn';
+        a.href=d.url;
+        a.target='_blank';
+        a.textContent=d.label;
         dl.appendChild(a);
       });
     })
-    .catch(()=>{
-      empty.classList.remove('hidden');
-    });
+    .catch(()=>empty.classList.remove('hidden'));
 }
 </script>
 
