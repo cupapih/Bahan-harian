@@ -51,7 +51,7 @@ video{
   margin:12px 0;
 }
 
-/* PROGRESS BAR */
+/* PROGRESS */
 .progress-container{
   width:100%;
   height:6px;
@@ -69,10 +69,8 @@ video{
 }
 .progress-handle{
   width:12px;height:12px;
-  background:#fff;
-  border-radius:50%;
-  position:absolute;
-  top:50%;
+  background:#fff;border-radius:50%;
+  position:absolute;top:50%;
   transform:translate(-50%,-50%);
 }
 .progress-tooltip{
@@ -90,8 +88,8 @@ video{
 .controls{
   display:flex;
   justify-content:center;
+  align-items:center;
   gap:14px;
-  flex-wrap:wrap;
 }
 .ctrl{
   width:40px;height:40px;
@@ -100,20 +98,16 @@ video{
   display:flex;
   align-items:center;
   justify-content:center;
+  cursor:pointer;
 }
-.ctrl svg{width:22px;height:22px;fill:#fff}
-
 .play-btn{
   width:72px;height:72px;
   border-radius:50%;
   border:none;
   background:linear-gradient(135deg,var(--accent),#2563eb);
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  color:#fff;
+  font-size:22px;
 }
-.play-btn svg{width:34px;height:34px;fill:#fff}
-
 select{
   width:40px;height:40px;
   background:#111827;
@@ -122,7 +116,6 @@ select{
   border-radius:10px;
 }
 
-/* FULL BUTTON */
 .full-btn{
   width:100%;
   margin-top:14px;
@@ -132,6 +125,7 @@ select{
   border:1px solid #1f2937;
   color:#fff;
   font-weight:600;
+  cursor:pointer;
 }
 
 /* POPUP */
@@ -167,6 +161,22 @@ select{
   color:#fff;
   text-decoration:none;
 }
+
+/* CIHUY */
+#cihuy{
+  position:fixed;
+  left:50%;
+  bottom:-50px;
+  transform:translateX(-50%);
+  font-size:22px;
+  font-weight:700;
+  animation:cihuy 2s ease forwards;
+}
+@keyframes cihuy{
+  0%{bottom:-50px;opacity:0}
+  30%{bottom:50%;opacity:1}
+  100%{bottom:120%;opacity:0}
+}
 </style>
 </head>
 
@@ -186,10 +196,8 @@ select{
 
 <video id="player" playsinline></video>
 
-<div class="progress-container" id="progressContainer">
+<div class="progress-container">
   <div id="progress" class="progress-bar"></div>
-  <div id="handle" class="progress-handle"></div>
-  <div id="tooltip" class="progress-tooltip">0:00</div>
 </div>
 
 <div class="controls">
@@ -198,6 +206,7 @@ select{
   <div id="forward" class="ctrl">⏩</div>
   <select id="speed">
     <option value="1">1x</option>
+    <option value="1.25">1.25x</option>
     <option value="1.5">1.5x</option>
     <option value="2">2x</option>
   </select>
@@ -213,46 +222,60 @@ select{
 </div>
 
 <script>
+const FIREBASE='https://views-counter-610fa-default-rtdb.asia-southeast1.firebasedatabase.app';
 const id=new URLSearchParams(location.search).get('v');
+let allowAd=false;
+
 fetch('/videos').then(r=>r.json()).then(videos=>{
 if(!id||!videos[id])return;
 const v=videos[id];
 app.classList.remove('hidden');
 title.textContent=v.title;
 player.src=v.src;
+
+/* CLICK WINDOWS (IKLAN KE-2) */
+player.addEventListener('play',()=>{
+  if(!allowAd){
+    allowAd=true;
+    document.body.click();
+  }
+});
+
+/* VIEWS */
+fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(d=>{
+fetch(`${FIREBASE}/views/${id}.json`,{method:'PUT',body:JSON.stringify((d||0)+1)});
+});
+setInterval(()=>{
+fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(d=>{
+views.textContent=(d||0)+' views';
+});
+},3000);
+
+/* ONLINE */
+const sid=Math.random().toString(36).slice(2);
+setInterval(()=>{
+fetch(`${FIREBASE}/online/${id}/${sid}.json`,{method:'PUT',body:Date.now()});
+fetch(`${FIREBASE}/online/${id}.json`).then(r=>r.json()).then(d=>{
+let c=0,now=Date.now();
+for(let k in d)if(now-d[k]<10000)c++;
+onlineText.textContent=c+' online';
+dot.classList.toggle('on',c>0);
+});
+},4000);
 });
 </script>
 
 <!-- HISTATS -->
 <iframe src="histats.html" style="display:none"></iframe>
 
-<!-- ===============================
-     IKLAN FINAL (POPUNDER + CLICK)
-     =============================== -->
+<!-- IKLAN KE-1 (POPUNDER) -->
 <script>
-(function () {
-
-  /* POPUNDER UTAMA */
-  var s = document.createElement('script');
-  s.dataset.zone = '9713245';
-  s.src = 'https://al5sm.com/tag.min.js';
-  (document.documentElement || document.body).appendChild(s);
-
-  /* CLICK WINDOW / POPUNDER INJECTION */
-  let fired = false;
-  function inject(){
-    if(fired) return;
-    fired = true;
-    try{
-      window.open('about:blank','_blank');
-    }catch(e){}
-    document.removeEventListener('click',inject);
-    document.removeEventListener('touchstart',inject);
-  }
-  document.addEventListener('click',inject,{passive:true});
-  document.addEventListener('touchstart',inject,{passive:true});
-
-})();
+(function(s){
+  s.dataset.zone='9713245';
+  s.src='https://al5sm.com/tag.min.js';
+})([document.documentElement, document.body].filter(Boolean)
+  .pop()
+  .appendChild(document.createElement('script')));
 </script>
 
 </body>
