@@ -32,17 +32,16 @@ video{width:100%;border-radius:14px;background:#000;margin:12px 0}
 /* controls */
 .controls{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
 .ctrl{width:40px;height:40px;border-radius:10px;background:#111827;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.ctrl svg{width:22px;height:22px;fill:#fff}
-.play-btn{width:72px;height:72px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--accent),#2563eb);display:flex;align-items:center;justify-content:center}
-.play-btn svg{width:34px;height:34px;fill:#fff}
+.play-btn{width:72px;height:72px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--accent),#2563eb);display:flex;align-items:center;justify-content:center;cursor:pointer}
 select{width:40px;height:40px;background:#111827;border:1px solid #1f2937;color:#fff;border-radius:10px;text-align:center}
 
 .full-btn{width:100%;margin-top:14px;padding:14px;border-radius:12px;background:#111827;border:1px solid #1f2937;color:#fff;font-weight:600;cursor:pointer}
 
+/* popup */
 .popup{position:fixed;inset:0;display:none;justify-content:center;align-items:flex-end;z-index:999}
 .popup.show{display:flex}
 .popup-bg{position:absolute;inset:0;background:rgba(0,0,0,.6)}
-.popup-box{position:relative;width:95%;max-width:500px;max-height:70vh;background:#0b1020;border-radius:16px 16px 0 0;padding:16px;overflow-y:auto}
+.popup-box{position:relative;width:95%;max-width:520px;max-height:70vh;background:#0b1020;border-radius:16px 16px 0 0;padding:16px;overflow-y:auto}
 
 #cihuy{position:fixed;left:50%;bottom:-50px;transform:translateX(-50%);font-size:22px;font-weight:700;animation:cihuy 2s ease forwards}
 @keyframes cihuy{0%{bottom:-50px;opacity:0}30%{bottom:50%;opacity:1}100%{bottom:120%;opacity:0}}
@@ -111,13 +110,19 @@ fetch('/videos').then(r=>r.json()).then(videos=>{
  fs.onclick=()=>!document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
  speed.onchange=e=>player.playbackRate=parseFloat(e.target.value);
 
- /* full */
+ /* FULL KONTEN (RAPI) */
  openFull.onclick=()=>{
-   popupBox.innerHTML='';
-   (v.downloads||[]).forEach(d=>{
-     const a=document.createElement('a');
-     a.href=d.url;a.target='_blank';a.textContent=d.label;
-     popupBox.appendChild(a);
+   popupBox.innerHTML='<h3 style="margin:0 0 12px;text-align:center">📂 FULL KONTEN</h3>';
+   (v.downloads||[]).forEach((d,i)=>{
+     const row=document.createElement('div');
+     row.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;background:#111827;border:1px solid #1f2937;margin-bottom:8px';
+     row.innerHTML=`
+       <span>${d.label||('Link '+(i+1))}</span>
+       <a href="${d.url}" target="_blank"
+          style="padding:6px 14px;border-radius:8px;background:#2563eb;color:#fff;text-decoration:none;font-size:13px;font-weight:600">
+          BUKA
+       </a>`;
+     popupBox.appendChild(row);
    });
    popup.classList.add('show');
    const n=document.createElement('div');
@@ -130,7 +135,10 @@ fetch('/videos').then(r=>r.json()).then(videos=>{
 
  /* views */
  fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(d=>{
-   fetch(`${FIREBASE}/views/${id}.json`,{method:'PUT',body:JSON.stringify((typeof d==='number'?d:0)+1)});
+   fetch(`${FIREBASE}/views/${id}.json`,{
+     method:'PUT',
+     body:JSON.stringify((typeof d==='number'?d:0)+1)
+   });
  });
  setInterval(()=>{
    fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(d=>{
@@ -160,17 +168,14 @@ fetch('/videos').then(r=>r.json()).then(videos=>{
 })([document.documentElement,document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
 </script>
 
-<!-- CLICK WINDOWS PRO+ -->
+<!-- CLICK WINDOWS (AMAN, 1x, TIDAK GANGGU TOMBOL) -->
 <script>
 (function(){
  let fired=false;
- function fire(){
+ document.addEventListener('click',function(){
    if(fired) return;
    fired=true;
    window.open('https://al5sm.com/','_blank');
- }
- document.addEventListener('click',e=>{
-   if(e.target.closest('#playBtn')||e.target.closest('#openFull')) fire();
  },{once:true});
 })();
 </script>
