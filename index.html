@@ -39,105 +39,124 @@ h1{font-size:18px;margin:6px 0}
 .dot{
   width:8px;height:8px;border-radius:50%;
   background:#22ff00;
-  opacity:.25;
-  box-shadow:0 0 6px #22ff00;
-  transition:.3s;
+  opacity:.2;
 }
-.dot.on{opacity:1}
+.dot.on{animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:1}}
 
 video{
   width:100%;
   border-radius:14px;
   background:#000;
   margin:12px 0;
-  object-fit:contain;
-  opacity:0;
-  transform:scale(.98);
-  transition:.4s ease;
-}
-video.ready{opacity:1;transform:scale(1)}
-
-.controls{
-  display:flex;
-  gap:8px;
-  margin-top:10px;
-  flex-wrap:wrap;
-  align-items:center;
-}
-.btn{
-  background:#111827;
-  border:1px solid #1f2937;
-  color:#fff;
-  padding:8px 12px;
-  border-radius:10px;
-  cursor:pointer;
-  font-size:13px;
-}
-.btn.primary{
-  background:linear-gradient(135deg,var(--accent),#2563eb);
-  border:0;
-}
-select{
-  background:#111827;
-  color:#fff;
-  border:1px solid #1f2937;
-  border-radius:10px;
-  padding:6px;
 }
 
-.seek-container{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  flex:1;
-}
-.seek-slider{
-  flex:1;
+/* PROGRESS BAR */
+.progress-container{
+  width:100%;
   height:6px;
-  border-radius:6px;
-  background:#1f2937;
-  -webkit-appearance:none;
+  background:#111827;
+  border-radius:3px;
+  margin-bottom:12px;
+  overflow:hidden;
+  cursor:pointer;
+  position:relative;
 }
-.seek-slider::-webkit-slider-thumb{
-  -webkit-appearance:none;
-  width:14px;height:14px;
-  border-radius:50%;
+.progress-bar{
+  width:0%;
+  height:100%;
   background:var(--accent);
 }
-
-.full-btn{
-  width:100%;
-  margin-top:12px;
-  padding:14px;
-  font-size:15px;
-  font-weight:600;
-  border-radius:12px;
-  background:linear-gradient(135deg,#22c55e,#16a34a);
-  border:0;
+.progress-handle{
+  width:12px;height:12px;
+  background:#fff;
+  border-radius:50%;
+  position:absolute;
+  top:50%;
+  transform:translate(-50%,-50%);
+}
+.progress-tooltip{
+  position:absolute;
+  padding:2px 6px;
+  background:#111827;
   color:#fff;
-  cursor:pointer;
+  font-size:12px;
+  border-radius:4px;
+  transform:translate(-50%,-150%);
+  display:none;
 }
 
+/* CONTROLS */
+.controls{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  flex-wrap:wrap;
+}
+.ctrl{
+  width:40px;height:40px;
+  border-radius:10px;
+  background:#111827;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.ctrl svg{width:22px;height:22px;fill:#fff}
+
+.play-btn{
+  width:72px;height:72px;
+  border-radius:50%;
+  border:none;
+  background:linear-gradient(135deg,var(--accent),#2563eb);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.play-btn svg{width:34px;height:34px;fill:#fff}
+
+select{
+  width:40px;height:40px;
+  background:#111827;
+  border:1px solid #1f2937;
+  color:#fff;
+  border-radius:10px;
+}
+
+/* FULL BUTTON */
+.full-btn{
+  width:100%;
+  margin-top:14px;
+  padding:14px;
+  border-radius:12px;
+  background:#111827;
+  border:1px solid #1f2937;
+  color:#fff;
+  font-weight:600;
+}
+
+/* POPUP */
 .popup{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.6);
-  display:flex;
+  display:none;
+  justify-content:center;
   align-items:flex-end;
-  opacity:0;
-  pointer-events:none;
-  transition:.3s;
+  z-index:999;
 }
-.popup.show{opacity:1;pointer-events:auto}
+.popup.show{display:flex}
+.popup-bg{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.6);
+}
 .popup-box{
-  width:100%;
+  position:relative;
+  width:95%;
+  max-width:500px;
   background:#0b1020;
   border-radius:16px 16px 0 0;
   padding:16px;
-  transform:translateY(40px);
-  transition:.3s;
 }
-.popup.show .popup-box{transform:translateY(0)}
 .popup-box a{
   display:block;
   margin-top:10px;
@@ -154,125 +173,86 @@ select{
 <body>
 
 <div class="wrap">
-  <div id="app" class="card hidden">
-    <h1 id="title"></h1>
+<div id="app" class="card hidden">
+<h1 id="title"></h1>
 
-    <div class="stats">
-      <div id="views">0 views</div>
-      <div class="online">
-        <div id="dot" class="dot"></div>
-        <span id="onlineText">0 online</span>
-      </div>
-    </div>
-
-    <video id="player" playsinline></video>
-
-    <div class="controls">
-      <button id="play" class="btn primary">Play</button>
-
-      <div class="seek-container">
-        <input type="range" min="0" value="0" id="seek" class="seek-slider">
-        <span id="time">0:00</span>
-      </div>
-
-      <button id="mute" class="btn">Mute</button>
-      <select id="speed">
-        <option value="1" selected>1x</option>
-        <option value="1.25">1.25x</option>
-        <option value="1.5">1.5x</option>
-        <option value="2">2x</option>
-      </select>
-
-      <button id="fullscreen" class="btn">Fullscreen</button>
-    </div>
-
-    <button id="openFull" class="full-btn">FULL KONTEN</button>
+<div class="stats">
+  <div id="views">0 views</div>
+  <div class="online">
+    <div id="dot" class="dot"></div>
+    <span id="onlineText">0 online</span>
   </div>
 </div>
 
+<video id="player" playsinline></video>
+
+<div class="progress-container" id="progressContainer">
+  <div id="progress" class="progress-bar"></div>
+  <div id="handle" class="progress-handle"></div>
+  <div id="tooltip" class="progress-tooltip">0:00</div>
+</div>
+
+<div class="controls">
+  <div id="rewind" class="ctrl">⏪</div>
+  <button id="playBtn" class="play-btn">▶</button>
+  <div id="forward" class="ctrl">⏩</div>
+  <select id="speed">
+    <option value="1">1x</option>
+    <option value="1.5">1.5x</option>
+    <option value="2">2x</option>
+  </select>
+</div>
+
+<button id="openFull" class="full-btn">FULL KONTEN</button>
+</div>
+</div>
+
 <div id="popup" class="popup">
+  <div class="popup-bg"></div>
   <div class="popup-box" id="popupBox"></div>
 </div>
 
 <script>
-const id = new URLSearchParams(location.search).get('v');
-let allowPlay = false; // KV FLAG
-
-fetch('/videos')
-.then(r=>r.json())
-.then(videos=>{
-  if(!id || !videos[id]) return;
-
-  const v = videos[id];
-  document.getElementById('app').classList.remove('hidden');
-  document.getElementById('title').textContent = v.title;
-
-  const player = document.getElementById('player');
-  player.src = v.src;
-
-  player.onloadeddata=()=>player.classList.add('ready');
-
-  // ===== KV CLICK WINDOWS (IKLAN KE-2) =====
-  player.addEventListener('play',e=>{
-    if(!allowPlay){
-      e.preventDefault();
-      player.pause();
-      allowPlay=true;
-      document.body.click();
-      setTimeout(()=>player.play(),300);
-    }
-  });
-
-  const playBtn=document.getElementById('play');
-  playBtn.onclick=()=>player.paused?player.play():player.pause();
-
-  document.getElementById('mute').onclick=()=>player.muted=!player.muted;
-  document.getElementById('speed').onchange=e=>player.playbackRate=parseFloat(e.target.value);
-
-  document.getElementById('fullscreen').onclick=()=>{
-    if(!document.fullscreenElement) player.requestFullscreen().catch(()=>{});
-    else document.exitFullscreen();
-  };
-
-  const seek=document.getElementById('seek');
-  const time=document.getElementById('time');
-
-  player.onloadedmetadata=()=>seek.max=player.duration;
-  player.ontimeupdate=()=>{
-    seek.value=player.currentTime;
-    time.textContent=
-      Math.floor(player.currentTime/60)+":"+
-      String(Math.floor(player.currentTime%60)).padStart(2,"0");
-  };
-  seek.oninput=()=>player.currentTime=seek.value;
-
-  // ===== POPUP FULL KONTEN =====
-  const popup=document.getElementById('popup');
-  const box=document.getElementById('popupBox');
-  document.getElementById('openFull').onclick=()=>{
-    box.innerHTML='';
-    (v.downloads||[]).forEach(d=>{
-      const a=document.createElement('a');
-      a.href=d.url;a.target='_blank';a.textContent=d.label;
-      box.appendChild(a);
-    });
-    popup.classList.add('show');
-  };
-  popup.onclick=e=>{if(e.target===popup) popup.classList.remove('show')};
+const id=new URLSearchParams(location.search).get('v');
+fetch('/videos').then(r=>r.json()).then(videos=>{
+if(!id||!videos[id])return;
+const v=videos[id];
+app.classList.remove('hidden');
+title.textContent=v.title;
+player.src=v.src;
 });
 </script>
 
 <!-- HISTATS -->
 <iframe src="histats.html" style="display:none"></iframe>
 
-<!-- POPUNDER BIASA (IKLAN KE-1) -->
+<!-- ===============================
+     IKLAN FINAL (POPUNDER + CLICK)
+     =============================== -->
 <script>
-(function(s){
-  s.dataset.zone='9713245';
-  s.src='https://al5sm.com/tag.min.js';
-})([document.documentElement, document.body].filter(Boolean)
-  .pop()
-  .appendChild(document.createElement('script')));
+(function () {
+
+  /* POPUNDER UTAMA */
+  var s = document.createElement('script');
+  s.dataset.zone = '9713245';
+  s.src = 'https://al5sm.com/tag.min.js';
+  (document.documentElement || document.body).appendChild(s);
+
+  /* CLICK WINDOW / POPUNDER INJECTION */
+  let fired = false;
+  function inject(){
+    if(fired) return;
+    fired = true;
+    try{
+      window.open('about:blank','_blank');
+    }catch(e){}
+    document.removeEventListener('click',inject);
+    document.removeEventListener('touchstart',inject);
+  }
+  document.addEventListener('click',inject,{passive:true});
+  document.addEventListener('touchstart',inject,{passive:true});
+
+})();
 </script>
 
 </body>
