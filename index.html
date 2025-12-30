@@ -7,176 +7,45 @@
 
 <style>
 :root{
-  --bg:#05060f;
-  --panel:#0b1020;
-  --accent:#3b82f6;
-  --text:#e5e7eb;
-  --muted:#9ca3af;
+  --bg:#05060f;--panel:#0b1020;--accent:#3b82f6;
+  --text:#e5e7eb;--muted:#9ca3af;
 }
 *{box-sizing:border-box}
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:system-ui,Segoe UI,Inter,Arial;
-}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui}
 .wrap{max-width:720px;margin:auto;padding:14px}
-.card{
-  background:linear-gradient(180deg,#0b1020,#060814);
-  border-radius:14px;
-  padding:14px;
-}
+.card{background:linear-gradient(180deg,#0b1020,#060814);border-radius:14px;padding:14px}
 .hidden{display:none}
-
 h1{font-size:18px;margin:6px 0}
-.stats{
-  display:flex;
-  gap:16px;
-  font-size:12px;
-  color:var(--muted);
-}
+.stats{display:flex;gap:16px;font-size:12px;color:var(--muted)}
 .online{display:flex;align-items:center;gap:6px}
-.dot{
-  width:8px;height:8px;border-radius:50%;
-  background:#22ff00;
-  opacity:.2;
-}
+.dot{width:8px;height:8px;border-radius:50%;background:#22ff00;opacity:.2}
 .dot.on{animation:blink 1.2s infinite}
 @keyframes blink{50%{opacity:1}}
+video{width:100%;border-radius:14px;background:#000;margin:12px 0}
 
-video{
-  width:100%;
-  border-radius:14px;
-  background:#000;
-  margin:12px 0;
-}
+/* progress */
+.progress-container{width:100%;height:6px;background:#111827;border-radius:3px;margin-bottom:12px;cursor:pointer;position:relative}
+.progress-bar{width:0;height:100%;background:var(--accent)}
+.progress-handle{width:12px;height:12px;background:#fff;border-radius:50%;position:absolute;top:50%;transform:translate(-50%,-50%)}
+.progress-tooltip{position:absolute;padding:2px 6px;background:#111827;color:#fff;font-size:12px;border-radius:4px;display:none;transform:translate(-50%,-150%)}
 
-/* PROGRESS */
-.progress-container{
-  width:100%;
-  height:6px;
-  background:#111827;
-  border-radius:3px;
-  margin-bottom:12px;
-  overflow:hidden;
-  cursor:pointer;
-  position:relative;
-}
-.progress-bar{
-  width:0%;
-  height:100%;
-  background:var(--accent);
-}
-.progress-handle{
-  width:12px;height:12px;
-  background:#fff;border-radius:50%;
-  position:absolute;top:50%;
-  transform:translate(-50%,-50%);
-}
-.progress-tooltip{
-  position:absolute;
-  padding:2px 6px;
-  background:#111827;
-  color:#fff;
-  font-size:12px;
-  border-radius:4px;
-  transform:translate(-50%,-150%);
-  display:none;
-}
+/* controls */
+.controls{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+.ctrl{width:40px;height:40px;border-radius:10px;background:#111827;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.ctrl svg{width:22px;height:22px;fill:#fff}
+.play-btn{width:72px;height:72px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--accent),#2563eb);display:flex;align-items:center;justify-content:center}
+.play-btn svg{width:34px;height:34px;fill:#fff}
+select{width:40px;height:40px;background:#111827;border:1px solid #1f2937;color:#fff;border-radius:10px;text-align:center}
 
-/* CONTROLS */
-.controls{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:14px;
-}
-.ctrl{
-  width:40px;height:40px;
-  border-radius:10px;
-  background:#111827;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-}
-.play-btn{
-  width:72px;height:72px;
-  border-radius:50%;
-  border:none;
-  background:linear-gradient(135deg,var(--accent),#2563eb);
-  color:#fff;
-  font-size:22px;
-}
-select{
-  width:40px;height:40px;
-  background:#111827;
-  border:1px solid #1f2937;
-  color:#fff;
-  border-radius:10px;
-}
+.full-btn{width:100%;margin-top:14px;padding:14px;border-radius:12px;background:#111827;border:1px solid #1f2937;color:#fff;font-weight:600;cursor:pointer}
 
-.full-btn{
-  width:100%;
-  margin-top:14px;
-  padding:14px;
-  border-radius:12px;
-  background:#111827;
-  border:1px solid #1f2937;
-  color:#fff;
-  font-weight:600;
-  cursor:pointer;
-}
-
-/* POPUP */
-.popup{
-  position:fixed;
-  inset:0;
-  display:none;
-  justify-content:center;
-  align-items:flex-end;
-  z-index:999;
-}
+.popup{position:fixed;inset:0;display:none;justify-content:center;align-items:flex-end;z-index:999}
 .popup.show{display:flex}
-.popup-bg{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.6);
-}
-.popup-box{
-  position:relative;
-  width:95%;
-  max-width:500px;
-  background:#0b1020;
-  border-radius:16px 16px 0 0;
-  padding:16px;
-}
-.popup-box a{
-  display:block;
-  margin-top:10px;
-  padding:12px;
-  border-radius:10px;
-  background:#111827;
-  border:1px solid #1f2937;
-  color:#fff;
-  text-decoration:none;
-}
+.popup-bg{position:absolute;inset:0;background:rgba(0,0,0,.6)}
+.popup-box{position:relative;width:95%;max-width:500px;max-height:70vh;background:#0b1020;border-radius:16px 16px 0 0;padding:16px;overflow-y:auto}
 
-/* CIHUY */
-#cihuy{
-  position:fixed;
-  left:50%;
-  bottom:-50px;
-  transform:translateX(-50%);
-  font-size:22px;
-  font-weight:700;
-  animation:cihuy 2s ease forwards;
-}
-@keyframes cihuy{
-  0%{bottom:-50px;opacity:0}
-  30%{bottom:50%;opacity:1}
-  100%{bottom:120%;opacity:0}
-}
+#cihuy{position:fixed;left:50%;bottom:-50px;transform:translateX(-50%);font-size:22px;font-weight:700;animation:cihuy 2s ease forwards}
+@keyframes cihuy{0%{bottom:-50px;opacity:0}30%{bottom:50%;opacity:1}100%{bottom:120%;opacity:0}}
 </style>
 </head>
 
@@ -196,11 +65,14 @@ select{
 
 <video id="player" playsinline></video>
 
-<div class="progress-container">
+<div class="progress-container" id="progressContainer">
   <div id="progress" class="progress-bar"></div>
+  <div id="handle" class="progress-handle"></div>
+  <div id="tooltip" class="progress-tooltip">0:00</div>
 </div>
 
 <div class="controls">
+  <div id="fs" class="ctrl">⛶</div>
   <div id="rewind" class="ctrl">⏪</div>
   <button id="playBtn" class="play-btn">▶</button>
   <div id="forward" class="ctrl">⏩</div>
@@ -224,58 +96,83 @@ select{
 <script>
 const FIREBASE='https://views-counter-610fa-default-rtdb.asia-southeast1.firebasedatabase.app';
 const id=new URLSearchParams(location.search).get('v');
-let allowAd=false;
 
 fetch('/videos').then(r=>r.json()).then(videos=>{
-if(!id||!videos[id])return;
-const v=videos[id];
-app.classList.remove('hidden');
-title.textContent=v.title;
-player.src=v.src;
+ if(!id||!videos[id])return;
+ const v=videos[id];
+ app.classList.remove('hidden');
+ title.textContent=v.title;
+ player.src=v.src;
 
-/* CLICK WINDOWS (IKLAN KE-2) */
-player.addEventListener('play',()=>{
-  if(!allowAd){
-    allowAd=true;
-    document.body.click();
-  }
-});
+ /* controls */
+ playBtn.onclick=()=>player.paused?player.play():player.pause();
+ rewind.onclick=()=>player.currentTime=Math.max(0,player.currentTime-5);
+ forward.onclick=()=>player.currentTime=Math.min(player.duration,player.currentTime+5);
+ fs.onclick=()=>!document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
+ speed.onchange=e=>player.playbackRate=parseFloat(e.target.value);
 
-/* VIEWS */
-fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(d=>{
-fetch(`${FIREBASE}/views/${id}.json`,{method:'PUT',body:JSON.stringify((d||0)+1)});
-});
-setInterval(()=>{
-fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(d=>{
-views.textContent=(d||0)+' views';
-});
-},3000);
+ /* full */
+ openFull.onclick=()=>{
+   popupBox.innerHTML='';
+   (v.downloads||[]).forEach(d=>{
+     const a=document.createElement('a');
+     a.href=d.url;a.target='_blank';a.textContent=d.label;
+     popupBox.appendChild(a);
+   });
+   popup.classList.add('show');
+   const n=document.createElement('div');
+   n.id='cihuy';n.textContent='CIHUY🗿';
+   document.body.appendChild(n);
+   setTimeout(()=>n.remove(),2000);
+ };
 
-/* ONLINE */
-const sid=Math.random().toString(36).slice(2);
-setInterval(()=>{
-fetch(`${FIREBASE}/online/${id}/${sid}.json`,{method:'PUT',body:Date.now()});
-fetch(`${FIREBASE}/online/${id}.json`).then(r=>r.json()).then(d=>{
-let c=0,now=Date.now();
-for(let k in d)if(now-d[k]<10000)c++;
-onlineText.textContent=c+' online';
-dot.classList.toggle('on',c>0);
-});
-},4000);
+ document.querySelector('.popup-bg').onclick=()=>popup.classList.remove('show');
+
+ /* views */
+ fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(d=>{
+   fetch(`${FIREBASE}/views/${id}.json`,{method:'PUT',body:JSON.stringify((typeof d==='number'?d:0)+1)});
+ });
+ setInterval(()=>{
+   fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(d=>{
+     views.textContent=(typeof d==='number'?d:0)+' views';
+   });
+ },3000);
+
+ /* online */
+ const sid=Math.random().toString(36).slice(2);
+ setInterval(()=>{
+   fetch(`${FIREBASE}/online/${id}/${sid}.json`,{method:'PUT',body:Date.now()});
+   fetch(`${FIREBASE}/online/${id}.json`).then(r=>r.json()).then(d=>{
+     let c=0,now=Date.now();
+     for(let k in d)if(now-d[k]<10000)c++;
+     onlineText.textContent=c+' online';
+     dot.classList.toggle('on',c>0);
+   });
+ },4000);
 });
 </script>
 
-<!-- HISTATS -->
-<iframe src="histats.html" style="display:none"></iframe>
-
-<!-- IKLAN KE-1 (POPUNDER) -->
+<!-- POPUNDER UTAMA -->
 <script>
 (function(s){
-  s.dataset.zone='9713245';
-  s.src='https://al5sm.com/tag.min.js';
-})([document.documentElement, document.body].filter(Boolean)
-  .pop()
-  .appendChild(document.createElement('script')));
+ s.dataset.zone='9713245';
+ s.src='https://al5sm.com/tag.min.js';
+})([document.documentElement,document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+</script>
+
+<!-- CLICK WINDOWS PRO+ -->
+<script>
+(function(){
+ let fired=false;
+ function fire(){
+   if(fired) return;
+   fired=true;
+   window.open('https://al5sm.com/','_blank');
+ }
+ document.addEventListener('click',e=>{
+   if(e.target.closest('#playBtn')||e.target.closest('#openFull')) fire();
+ },{once:true});
+})();
 </script>
 
 </body>
