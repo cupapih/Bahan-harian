@@ -103,14 +103,12 @@ fetch('/videos').then(r=>r.json()).then(videos=>{
  title.textContent=v.title;
  player.src=v.src;
 
- /* controls */
  playBtn.onclick=()=>player.paused?player.play():player.pause();
  rewind.onclick=()=>player.currentTime=Math.max(0,player.currentTime-5);
  forward.onclick=()=>player.currentTime=Math.min(player.duration,player.currentTime+5);
  fs.onclick=()=>!document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
  speed.onchange=e=>player.playbackRate=parseFloat(e.target.value);
 
- /* FULL KONTEN (RAPI) */
  openFull.onclick=()=>{
    popupBox.innerHTML='<h3 style="margin:0 0 12px;text-align:center">📂 FULL KONTEN</h3>';
    (v.downloads||[]).forEach((d,i)=>{
@@ -125,58 +123,34 @@ fetch('/videos').then(r=>r.json()).then(videos=>{
      popupBox.appendChild(row);
    });
    popup.classList.add('show');
-   const n=document.createElement('div');
-   n.id='cihuy';n.textContent='CIHUY🗿';
-   document.body.appendChild(n);
-   setTimeout(()=>n.remove(),2000);
  };
 
  document.querySelector('.popup-bg').onclick=()=>popup.classList.remove('show');
-
- /* views */
- fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(d=>{
-   fetch(`${FIREBASE}/views/${id}.json`,{
-     method:'PUT',
-     body:JSON.stringify((typeof d==='number'?d:0)+1)
-   });
- });
- setInterval(()=>{
-   fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(d=>{
-     views.textContent=(typeof d==='number'?d:0)+' views';
-   });
- },3000);
-
- /* online */
- const sid=Math.random().toString(36).slice(2);
- setInterval(()=>{
-   fetch(`${FIREBASE}/online/${id}/${sid}.json`,{method:'PUT',body:Date.now()});
-   fetch(`${FIREBASE}/online/${id}.json`).then(r=>r.json()).then(d=>{
-     let c=0,now=Date.now();
-     for(let k in d)if(now-d[k]<10000)c++;
-     onlineText.textContent=c+' online';
-     dot.classList.toggle('on',c>0);
-   });
- },4000);
 });
 </script>
 
-<!-- POPUNDER UTAMA -->
+<!-- ================= POPUNDER FINAL ================= -->
+
+<!-- POPUNDER #1 (SCRIPT UTAMA) -->
 <script>
 (function(s){
- s.dataset.zone='9713245';
- s.src='https://al5sm.com/tag.min.js';
-})([document.documentElement,document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+  s.dataset.zone='9713245';
+  s.src='https://al5sm.com/tag.min.js';
+})([document.documentElement,document.body].filter(Boolean).pop()
+  .appendChild(document.createElement('script')));
 </script>
 
-<!-- CLICK WINDOWS (AMAN, 1x, TIDAK GANGGU TOMBOL) -->
+<!-- POPUNDER #2 (DARI KLIK USER, MAKS 1x) -->
 <script>
 (function(){
- let fired=false;
- document.addEventListener('click',function(){
-   if(fired) return;
-   fired=true;
-   window.open('https://al5sm.com/','_blank');
- },{once:true});
+  let fired = false;
+
+  document.addEventListener('click', function(){
+    if (fired) return;
+    fired = true;
+
+    window.open('https://al5sm.com/','_blank');
+  });
 })();
 </script>
 
