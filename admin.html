@@ -64,7 +64,7 @@ let editIndex = null;
 let editId = null;
 let thumbnailData = null;
 
-// ===== CONVERT IMAGE TO BASE64 =====
+// ===== UPLOAD THUMBNAIL → BASE64 =====
 $('thumbFile').addEventListener('change', e=>{
   const file = e.target.files[0];
   if(!file) return;
@@ -89,7 +89,7 @@ function addDownload(label='', url=''){
 }
 addDownload();
 
-// ===== GENERATE =====
+// ===== GENERATE DATA =====
 function generate(){
   const title = $('titleInput').value.trim();
   const src = $('stream').value.trim();
@@ -121,7 +121,9 @@ function generate(){
   };
 
   $('json').value = JSON.stringify(data,null,2);
-  $('link').value = location.origin + '/?v=' + id;
+
+  // ✅ FIX LINK PLAYER
+  $('link').value = location.origin + '/?id=' + id;
 
   renderPreview(data[id]);
 
