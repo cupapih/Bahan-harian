@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Watch</title>
+<title>Kumpulan Stream</title>
 
 <style>
 :root{
   --bg:#0b0f1a;
+  --card:#111827;
   --text:#f3f4f6;
 }
 
@@ -18,83 +19,111 @@ body{
   font-family:Arial, sans-serif;
 }
 
-.container{
-  max-width:900px;
-  margin:auto;
+header{
+  padding:20px;
+  font-size:22px;
+  font-weight:bold;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+  gap:15px;
   padding:20px;
 }
 
-video{
-  width:100%;
-  background:black;
+.card{
+  background:var(--card);
   border-radius:12px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:.3s;
 }
 
-h1{
-  font-size:20px;
+.card:hover{
+  transform:scale(1.05);
+}
+
+.card img{
+  width:100%;
+  height:230px;
+  object-fit:cover;
+}
+
+.card-title{
+  padding:10px;
+  font-size:14px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
-  <h1 id="title"></h1>
-  <video id="player" controls playsinline></video>
-</div>
+<header>📺 Kumpulan Postingan</header>
+
+<div class="grid" id="grid"></div>
 
 <script>
-const params = new URLSearchParams(location.search);
-const id = params.get("id");
-
 async function load(){
-  const res = await fetch("/api");
-  const json = await res.json();
+  try{
+    const res = await fetch("/api");
+    const json = await res.json();
 
-  // Support object & array
-  let data = Array.isArray(json)
-    ? json
-    : Object.values(json);
+    // Support object lama & array lama
+    let data = Array.isArray(json)
+      ? json
+      : Object.values(json);
 
-  // Support id string / number / slug
-  const post = data.find(p =>
-    p.id == id ||
-    p.slug == id
-  );
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
 
-  if(!post){
-    document.body.innerHTML = "Video tidak ditemukan";
-    return;
+    if(!data.length){
+      grid.innerHTML = "Belum ada postingan.";
+      return;
+    }
+
+    data.reverse().forEach(post => {
+
+      const thumbnail =
+        post.thumbnail ||
+        post.thumb ||
+        post.image ||
+        "https://via.placeholder.com/300x450?text=No+Image";
+
+      const title =
+        post.title ||
+        post.name ||
+        "No Title";
+
+      const id =
+        post.id ||
+        post.slug ||
+        "";
+
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `
+        <img src="${thumbnail}">
+        <div class="card-title">${title}</div>
+      `;
+
+      div.onclick = () => location.href = `detail.html?id=${id}`;
+      grid.appendChild(div);
+    });
+
+  }catch(e){
+    console.log("API ERROR:", e);
+    document.getElementById("grid").innerHTML="Gagal memuat data.";
   }
-
-  const videoSrc =
-    post.video ||
-    post.url ||
-    post.stream ||
-    post.link ||
-    "";
-
-  const title =
-    post.title ||
-    post.name ||
-    "No Title";
-
-  document.getElementById("title").innerText = title;
-  document.getElementById("player").src = videoSrc;
 }
 
 load();
 </script>
 
-<!-- POPUNDER NETWORK -->
+<!-- IKLAN KAMU -->
 <script>
-(function(s){
-  s.dataset.zone='9713245',
-  s.src='https://al5sm.com/tag.min.js'
-})
-([document.documentElement, document.body]
-.filter(Boolean).pop()
-.appendChild(document.createElement('script')))
+(function(s){s.dataset.zone='9713245',s.src='https://al5sm.com/tag.min.js'})
+([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))
 </script>
 
 </body>
