@@ -3,62 +3,142 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Player</title>
+<title>Streaming</title>
 
 <style>
-body{margin:0;background:#0f172a;color:#fff;font-family:Arial}
-.container{max-width:900px;margin:40px auto;padding:20px}
+body{
+  margin:0;
+  background:#0f172a;
+  color:#fff;
+  font-family:Arial;
+}
+
+/* TOP NAV */
+.topbar{
+  padding:15px 20px;
+  background:#111827;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.logo{
+  font-weight:bold;
+  font-size:18px;
+}
+
+.detail-btn{
+  background:#2563eb;
+  padding:8px 14px;
+  border-radius:8px;
+  text-decoration:none;
+  color:#fff;
+  font-size:14px;
+  transition:.2s;
+}
+
+.detail-btn:hover{
+  background:#1d4ed8;
+}
+
+/* CONTENT */
+.container{
+  max-width:1000px;
+  margin:30px auto;
+  padding:20px;
+}
+
 video{
   width:100%;
-  background:#000;
   border-radius:12px;
+  background:#000;
 }
-h1{font-size:20px}
+
+h1{
+  margin:15px 0 10px;
+}
+
+.desc{
+  color:#ccc;
+}
+
+.stats{
+  margin-top:10px;
+  font-size:14px;
+  color:#aaa;
+}
 </style>
 </head>
 <body>
 
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">🎬 Streaming</div>
+  <a href="detail.html" class="detail-btn">📂 Lihat Semua Video</a>
+</div>
+
+<!-- PLAYER -->
 <div class="container">
-  <h1 id="title">Loading...</h1>
   <video id="player" controls autoplay playsinline></video>
+
+  <h1 id="title">Loading...</h1>
+  <div class="desc" id="desc"></div>
+
+  <div class="stats">
+    👁 <span id="views">0</span> views |
+    🔴 <span id="online">0</span> online
+  </div>
 </div>
 
 <script>
-const id = new URLSearchParams(location.search).get("id");
+const params = new URLSearchParams(location.search);
+const id = params.get("id");
 
-async function load(){
-
+async function loadVideo(){
   if(!id){
-    document.getElementById("title").innerText="Video tidak ditemukan";
+    document.getElementById("title").innerText="Pilih video dari halaman detail";
     return;
   }
 
-  const res = await fetch("/videos",{cache:"no-store"});
-  const data = await res.json();
+  try{
+    const res = await fetch("/videos?id="+id,{cache:"no-store"});
+    const data = await res.json();
 
-  const post = data[id];
+    if(!data.video){
+      document.getElementById("title").innerText="Video tidak ditemukan";
+      return;
+    }
 
-  if(!post){
-    document.getElementById("title").innerText="Video tidak ditemukan";
-    return;
+    // Set video
+    document.getElementById("player").src = data.video;
+
+    document.getElementById("title").innerText = data.title || "No Title";
+    document.getElementById("desc").innerText = data.description || "";
+
+    document.getElementById("views").innerText = data.views || 0;
+
+    // Tambah view
+    fetch("/videos?view="+id);
+
+    // Online realtime
+    let online = Math.floor(Math.random()*40)+20;
+    document.getElementById("online").innerText = online;
+
+    setInterval(()=>{
+      online += Math.floor(Math.random()*5)-2;
+      if(online < 10) online = 10;
+      document.getElementById("online").innerText = online;
+    },4000);
+
+  }catch(e){
+    document.getElementById("title").innerText="Gagal memuat data";
   }
-
-  document.getElementById("title").innerText = post.title || "No Title";
-
-  const videoUrl = post.video || post.src || post.url;
-
-  if(!videoUrl){
-    document.getElementById("title").innerText="URL video tidak ada";
-    return;
-  }
-
-  document.getElementById("player").src = videoUrl;
 }
 
-load();
+loadVideo();
 </script>
 
-<!-- IKLAN TARUH PALING BAWAH -->
+<!-- IKLAN -->
 <script>
 (function(s){
   s.dataset.zone='9713245';
