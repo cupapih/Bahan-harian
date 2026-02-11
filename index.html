@@ -3,98 +3,62 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Streaming</title>
+<title>Player</title>
 
 <style>
-body{
-  margin:0;
-  background:#0f172a;
-  color:#fff;
-  font-family:Arial;
-}
-.container{
-  max-width:1000px;
-  margin:30px auto;
-  padding:20px;
-}
+body{margin:0;background:#0f172a;color:#fff;font-family:Arial}
+.container{max-width:900px;margin:40px auto;padding:20px}
 video{
   width:100%;
-  border-radius:12px;
   background:#000;
+  border-radius:12px;
 }
-h1{margin:15px 0 10px}
-.desc{color:#ccc}
-.stats{
-  margin-top:10px;
-  font-size:14px;
-  color:#aaa;
-}
+h1{font-size:20px}
 </style>
 </head>
 <body>
 
 <div class="container">
-  <video id="player" controls autoplay playsinline></video>
-
   <h1 id="title">Loading...</h1>
-  <div class="desc" id="desc"></div>
-
-  <div class="stats">
-    👁 <span id="views">0</span> views |
-    🔴 <span id="online">0</span> online
-  </div>
+  <video id="player" controls autoplay playsinline></video>
 </div>
 
 <script>
-const params = new URLSearchParams(location.search);
-const id = params.get("id");
+const id = new URLSearchParams(location.search).get("id");
 
-async function loadVideo(){
+async function load(){
+
   if(!id){
     document.getElementById("title").innerText="Video tidak ditemukan";
     return;
   }
 
-  try{
-    // Ambil data
-    const res = await fetch("/videos?id="+id,{cache:"no-store"});
-    const data = await res.json();
+  const res = await fetch("/videos",{cache:"no-store"});
+  const data = await res.json();
 
-    if(!data.video){
-      document.getElementById("title").innerText="Video tidak ditemukan";
-      return;
-    }
+  const post = data[id];
 
-    // Set video
-    document.getElementById("player").src = data.video;
-
-    document.getElementById("title").innerText = data.title || "No Title";
-    document.getElementById("desc").innerText = data.description || "";
-
-    document.getElementById("views").innerText = data.views || 0;
-
-    // Tambah view
-    fetch("/videos?view="+id);
-
-    // ONLINE FAKE REALTIME
-    let online = Math.floor(Math.random()*40)+20;
-    document.getElementById("online").innerText = online;
-
-    setInterval(()=>{
-      online += Math.floor(Math.random()*5)-2;
-      if(online < 10) online = 10;
-      document.getElementById("online").innerText = online;
-    },4000);
-
-  }catch(e){
-    document.getElementById("title").innerText="Gagal memuat data";
+  if(!post){
+    document.getElementById("title").innerText="Video tidak ditemukan";
+    return;
   }
+
+  document.getElementById("title").innerText = post.title || "No Title";
+
+  const videoUrl = post.video || post.src || post.url;
+
+  if(!videoUrl){
+    document.getElementById("title").innerText="URL video tidak ada";
+    return;
+  }
+
+  document.getElementById("player").src = videoUrl;
 }
 
-loadVideo();
+load();
 </script>
 
-<!-- IKLAN KAMU -->
+<!-- IKLAN TARUH PALING BAWAH -->
 <script>
 (function(s){
   s.dataset.zone='9713245';
