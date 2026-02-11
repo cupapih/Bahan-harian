@@ -1,7 +1,18 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <script>(function(s){s.dataset.zone='9713245',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+
+<!-- IKLAN 1 -->
+<script>
+(function(s){
+  s.dataset.zone='9713245';
+  s.src='https://al5sm.com/tag.min.js';
+})
+([document.documentElement, document.body]
+.filter(Boolean).pop()
+.appendChild(document.createElement('script')))
+</script>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Streaming Player</title>
@@ -13,8 +24,6 @@ body{
   color:#fff;
   font-family:Arial, sans-serif;
 }
-
-/* TOPBAR */
 .topbar{
   background:#111827;
   padding:15px 20px;
@@ -22,12 +31,7 @@ body{
   justify-content:space-between;
   align-items:center;
 }
-
-.logo{
-  font-size:18px;
-  font-weight:bold;
-}
-
+.logo{font-size:18px;font-weight:bold;}
 .detail-btn{
   background:#2563eb;
   padding:8px 14px;
@@ -35,26 +39,36 @@ body{
   text-decoration:none;
   color:#fff;
   font-size:14px;
-  transition:.2s;
 }
-
-.detail-btn:hover{
-  background:#1d4ed8;
-}
-
-/* CONTAINER */
 .container{
   max-width:1000px;
   width:95%;
   margin:30px auto;
   padding:20px;
 }
-
-/* PLAYER BOX */
 .player-box{
   background:#111827;
   padding:15px;
   border-radius:14px;
+}
+
+/* WRAPPER VIDEO */
+.player-wrapper{
+  position:relative;
+}
+
+/* WATERMARK */
+.watermark{
+  position:absolute;
+  bottom:12px;
+  right:12px;
+  background:rgba(0,0,0,0.5);
+  padding:6px 10px;
+  border-radius:6px;
+  font-size:12px;
+  color:white;
+  pointer-events:none;
+  font-weight:bold;
 }
 
 video{
@@ -63,42 +77,29 @@ video{
   border-radius:12px;
 }
 
-h1{
-  margin:15px 0 8px;
-  font-size:22px;
-}
-
-.desc{
-  color:#9ca3af;
-  margin-bottom:10px;
-}
-
-.stats{
-  font-size:14px;
-  color:#9ca3af;
-}
-
-.loading{
-  text-align:center;
-  padding:40px;
-  color:#9ca3af;
-}
+h1{margin:15px 0 8px;font-size:22px;}
+.desc{color:#9ca3af;margin-bottom:10px;}
+.stats{font-size:14px;color:#9ca3af;}
+.loading{text-align:center;padding:40px;color:#9ca3af;}
 </style>
 </head>
+
 <body>
 
-<!-- TOP NAV -->
 <div class="topbar">
   <div class="logo">🎬 YT HARIAN ASUPAN</div>
   <a href="detail.html" class="detail-btn">📂 Semua Video</a>
 </div>
 
-<!-- CONTENT -->
 <div class="container">
   <div class="player-box">
     <h1 id="title">Loading...</h1>
 
-    <video id="player" controls autoplay muted playsinline></video>
+    <!-- VIDEO + WATERMARK -->
+    <div class="player-wrapper">
+      <video id="player" controls playsinline></video>
+      <div class="watermark">Harian Asupan</div>
+    </div>
 
     <div class="desc" id="desc"></div>
 
@@ -121,7 +122,6 @@ const onlineEl = document.getElementById("online");
 const msgEl = document.getElementById("msg");
 
 async function load(){
-
   if(!id){
     titleEl.innerText = "Pilih video dari halaman detail";
     return;
@@ -144,28 +144,17 @@ async function load(){
     descEl.innerText = post.description || "";
 
     const videoUrl = post.video || post.src || post.url;
-
-    if(!videoUrl){
-      titleEl.innerText = "URL video tidak tersedia";
-      msgEl.innerText = "";
-      return;
-    }
-
     player.src = videoUrl + "#t=0.1";
 
-    // ===== VIEW COUNTER LOCAL =====
     const key = "views_" + id;
     let views = localStorage.getItem(key) || 0;
     views++;
     localStorage.setItem(key, views);
     viewsEl.innerText = views;
 
-    // ===== AUTO RESUME =====
     const timeKey = "time_" + id;
     const savedTime = localStorage.getItem(timeKey);
-    if(savedTime){
-      player.currentTime = savedTime;
-    }
+    if(savedTime) player.currentTime = savedTime;
 
     player.addEventListener("timeupdate", () => {
       localStorage.setItem(timeKey, player.currentTime);
@@ -180,7 +169,6 @@ async function load(){
       msgEl.innerText = "";
     };
 
-    // ===== ONLINE COUNTER =====
     let online = Math.floor(Math.random()*50)+20;
     onlineEl.innerText = online;
 
@@ -195,11 +183,64 @@ async function load(){
     msgEl.innerText = "";
   }
 }
-
 load();
 </script>
 
-<!-- IKLAN SIMPLE -->
+<!-- ANTI ADBLOCK -->
+<script>
+function detectAdBlock() {
+  let bait = document.createElement("div");
+  bait.className = "adsbox";
+  bait.style.height = "1px";
+  document.body.appendChild(bait);
+
+  setTimeout(() => {
+    if (bait.offsetHeight === 0) {
+      showAdblockWarning();
+    }
+    bait.remove();
+  }, 100);
+}
+
+function showAdblockWarning() {
+  document.body.innerHTML = `
+    <div style="
+      position:fixed;
+      top:0;left:0;
+      width:100%;
+      height:100%;
+      background:#0b0f1a;
+      color:white;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-family:Arial;
+      z-index:99999;
+      padding:20px;
+    ">
+      <div>
+        <h2>🚫 AdBlock Terdeteksi</h2>
+        <p>Matikan AdBlock untuk menonton video.</p>
+        <button onclick="location.reload()" style="
+          margin-top:15px;
+          padding:10px 20px;
+          background:#2563eb;
+          border:none;
+          color:white;
+          border-radius:8px;
+          cursor:pointer;
+        ">
+          Saya Sudah Matikan
+        </button>
+      </div>
+    </div>
+  `;
+}
+window.addEventListener("load", detectAdBlock);
+</script>
+
+<!-- IKLAN 2 -->
 <script>
 (function(s){
   s.dataset.zone='9713245';
