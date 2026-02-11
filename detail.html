@@ -8,7 +8,6 @@
 <style>
 :root{
   --bg:#0b0f1a;
-  --card:#111827;
   --text:#f3f4f6;
 }
 
@@ -50,17 +49,38 @@ const id = params.get("id");
 
 async function load(){
   const res = await fetch("/api");
-  const dataObj = await res.json();
-  const data = Object.values(dataObj);
-  const post = data.find(p=>p.id===id);
+  const json = await res.json();
+
+  // Support object & array
+  let data = Array.isArray(json)
+    ? json
+    : Object.values(json);
+
+  // Support id string / number / slug
+  const post = data.find(p =>
+    p.id == id ||
+    p.slug == id
+  );
 
   if(!post){
-    document.body.innerHTML="Video tidak ditemukan";
+    document.body.innerHTML = "Video tidak ditemukan";
     return;
   }
 
-  document.getElementById("title").innerText = post.title;
-  document.getElementById("player").src = post.video;
+  const videoSrc =
+    post.video ||
+    post.url ||
+    post.stream ||
+    post.link ||
+    "";
+
+  const title =
+    post.title ||
+    post.name ||
+    "No Title";
+
+  document.getElementById("title").innerText = title;
+  document.getElementById("player").src = videoSrc;
 }
 
 load();

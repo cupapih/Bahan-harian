@@ -3,13 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HARIAN</title>
+<title>Streaming</title>
 
 <style>
 :root{
   --bg:#0b0f1a;
   --card:#111827;
-  --accent:#3b82f6;
   --text:#f3f4f6;
 }
 
@@ -37,8 +36,8 @@ header{
   background:var(--card);
   border-radius:12px;
   overflow:hidden;
-  transition:.3s;
   cursor:pointer;
+  transition:.3s;
 }
 
 .card:hover{
@@ -61,25 +60,47 @@ header{
 <body>
 
 <header>🎬 Streaming</header>
-
 <div class="grid" id="grid"></div>
 
 <script>
 async function load(){
   const res = await fetch("/api");
-  const dataObj = await res.json();
-  const data = Object.values(dataObj);
+  const json = await res.json();
+
+  // Support semua struktur lama
+  let data = Array.isArray(json)
+    ? json
+    : Object.values(json);
 
   const grid = document.getElementById("grid");
+  grid.innerHTML = "";
 
-  data.reverse().forEach(post=>{
+  data.reverse().forEach(post => {
+
+    const thumbnail =
+      post.thumbnail ||
+      post.thumb ||
+      post.image ||
+      "https://via.placeholder.com/300x450?text=No+Image";
+
+    const title =
+      post.title ||
+      post.name ||
+      "No Title";
+
+    const id =
+      post.id ||
+      post.slug ||
+      "";
+
     const div = document.createElement("div");
     div.className="card";
     div.innerHTML=`
-      <img src="${post.thumbnail}" alt="">
-      <div class="card-title">${post.title}</div>
+      <img src="${thumbnail}">
+      <div class="card-title">${title}</div>
     `;
-    div.onclick=()=>location.href=`detail.html?id=${post.id}`;
+
+    div.onclick=()=>location.href=`detail.html?id=${id}`;
     grid.appendChild(div);
   });
 }
