@@ -59,17 +59,23 @@ header{
 
 <body>
 
-<header>📺 Kumpulan Postingan</header>
-
+<header>📺 Kumpulan Semua Postingan</header>
 <div class="grid" id="grid"></div>
 
 <script>
 async function load(){
   try{
-    const res = await fetch("/api");
+    const res = await fetch(window.location.origin + "/api", {
+      cache: "no-store"
+    });
+
+    if(!res.ok){
+      throw new Error("API tidak bisa diakses");
+    }
+
     const json = await res.json();
 
-    // Support object lama & array lama
+    // Support object & array lama
     let data = Array.isArray(json)
       ? json
       : Object.values(json);
@@ -82,6 +88,7 @@ async function load(){
       return;
     }
 
+    // Tampilkan dari terbaru
     data.reverse().forEach(post => {
 
       const thumbnail =
@@ -107,23 +114,31 @@ async function load(){
         <div class="card-title">${title}</div>
       `;
 
-      div.onclick = () => location.href = `detail.html?id=${id}`;
+      // PLAYER TETAP MELALUI INDEX
+      div.onclick = () => location.href = `index.html?id=${id}`;
+
       grid.appendChild(div);
     });
 
   }catch(e){
     console.log("API ERROR:", e);
-    document.getElementById("grid").innerHTML="Gagal memuat data.";
+    document.getElementById("grid").innerHTML =
+      "Gagal memuat data.";
   }
 }
 
 load();
 </script>
 
-<!-- IKLAN KAMU -->
+<!-- IKLAN -->
 <script>
-(function(s){s.dataset.zone='9713245',s.src='https://al5sm.com/tag.min.js'})
-([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))
+(function(s){
+  s.dataset.zone='9713245';
+  s.src='https://al5sm.com/tag.min.js';
+})
+([document.documentElement, document.body]
+.filter(Boolean).pop()
+.appendChild(document.createElement('script')))
 </script>
 
 </body>
