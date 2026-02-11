@@ -44,6 +44,7 @@ body{
 /* CONTAINER */
 .container{
   max-width:1000px;
+  width:95%;
   margin:30px auto;
   padding:20px;
 }
@@ -75,6 +76,12 @@ h1{
   font-size:14px;
   color:#9ca3af;
 }
+
+.loading{
+  text-align:center;
+  padding:40px;
+  color:#9ca3af;
+}
 </style>
 </head>
 <body>
@@ -89,7 +96,8 @@ h1{
 <div class="container">
   <div class="player-box">
     <h1 id="title">Loading...</h1>
-    <video id="player" controls autoplay playsinline></video>
+
+    <video id="player" controls autoplay muted playsinline></video>
 
     <div class="desc" id="desc"></div>
 
@@ -97,59 +105,100 @@ h1{
       👁 <span id="views">0</span> views |
       🔴 <span id="online">0</span> online
     </div>
+
+    <div id="msg" class="loading"></div>
   </div>
 </div>
 
 <script>
 const id = new URLSearchParams(location.search).get("id");
+const player = document.getElementById("player");
+const titleEl = document.getElementById("title");
+const descEl = document.getElementById("desc");
+const viewsEl = document.getElementById("views");
+const onlineEl = document.getElementById("online");
+const msgEl = document.getElementById("msg");
 
 async function load(){
 
   if(!id){
-    document.getElementById("title").innerText="Pilih video dari halaman detail";
+    titleEl.innerText = "Pilih video dari halaman detail";
     return;
   }
 
-  const res = await fetch("/videos",{cache:"no-store"});
-  const data = await res.json();
-  const post = data[id];
+  try{
+    msgEl.innerText = "Memuat video...";
 
-  if(!post){
-    document.getElementById("title").innerText="Video tidak ditemukan";
-    return;
+    const res = await fetch("/videos",{cache:"no-store"});
+    const data = await res.json();
+    const post = data[id];
+
+    if(!post){
+      titleEl.innerText = "Video tidak ditemukan";
+      msgEl.innerText = "";
+      return;
+    }
+
+    titleEl.innerText = post.title || "No Title";
+    descEl.innerText = post.description || "";
+
+    const videoUrl = post.video || post.src || post.url;
+
+    if(!videoUrl){
+      titleEl.innerText = "URL video tidak tersedia";
+      msgEl.innerText = "";
+      return;
+    }
+
+    player.src = videoUrl + "#t=0.1";
+
+    // ===== VIEW COUNTER LOCAL =====
+    const key = "views_" + id;
+    let views = localStorage.getItem(key) || 0;
+    views++;
+    localStorage.setItem(key, views);
+    viewsEl.innerText = views;
+
+    // ===== AUTO RESUME =====
+    const timeKey = "time_" + id;
+    const savedTime = localStorage.getItem(timeKey);
+    if(savedTime){
+      player.currentTime = savedTime;
+    }
+
+    player.addEventListener("timeupdate", () => {
+      localStorage.setItem(timeKey, player.currentTime);
+    });
+
+    player.addEventListener("loadeddata", () => {
+      msgEl.innerText = "";
+    });
+
+    player.onerror = () => {
+      titleEl.innerText = "Video gagal diputar";
+      msgEl.innerText = "";
+    };
+
+    // ===== ONLINE COUNTER =====
+    let online = Math.floor(Math.random()*50)+20;
+    onlineEl.innerText = online;
+
+    setInterval(()=>{
+      online += Math.floor(Math.random()*5)-2;
+      if(online < 10) online = 10;
+      onlineEl.innerText = online;
+    },4000);
+
+  }catch(e){
+    titleEl.innerText = "Gagal memuat data";
+    msgEl.innerText = "";
   }
-
-  document.getElementById("title").innerText = post.title || "No Title";
-  document.getElementById("desc").innerText = post.description || "";
-
-  const videoUrl = post.video || post.src || post.url;
-
-  if(!videoUrl){
-    document.getElementById("title").innerText="URL video tidak ada";
-    return;
-  }
-
-  document.getElementById("player").src = videoUrl;
-
-  // VIEW COUNTER
-  post.views = (post.views || 0) + 1;
-  document.getElementById("views").innerText = post.views;
-
-  // ONLINE RANDOM
-  let online = Math.floor(Math.random()*50)+20;
-  document.getElementById("online").innerText = online;
-
-  setInterval(()=>{
-    online += Math.floor(Math.random()*5)-2;
-    if(online < 10) online = 10;
-    document.getElementById("online").innerText = online;
-  },4000);
 }
 
 load();
 </script>
 
-<!-- IKLAN -->
+<!-- IKLAN SIMPLE -->
 <script>
 (function(s){
   s.dataset.zone='9713245';
