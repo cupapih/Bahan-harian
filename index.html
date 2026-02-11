@@ -12,56 +12,18 @@ body{
   color:#fff;
   font-family:Arial;
 }
-
-/* TOP NAV */
-.topbar{
-  padding:15px 20px;
-  background:#111827;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.logo{
-  font-weight:bold;
-  font-size:18px;
-}
-
-.detail-btn{
-  background:#2563eb;
-  padding:8px 14px;
-  border-radius:8px;
-  text-decoration:none;
-  color:#fff;
-  font-size:14px;
-  transition:.2s;
-}
-
-.detail-btn:hover{
-  background:#1d4ed8;
-}
-
-/* CONTENT */
 .container{
   max-width:1000px;
   margin:30px auto;
   padding:20px;
 }
-
 video{
   width:100%;
   border-radius:12px;
   background:#000;
 }
-
-h1{
-  margin:15px 0 10px;
-}
-
-.desc{
-  color:#ccc;
-}
-
+h1{margin:15px 0 10px}
+.desc{color:#ccc}
 .stats{
   margin-top:10px;
   font-size:14px;
@@ -71,13 +33,6 @@ h1{
 </head>
 <body>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <div class="logo">🎬 Streaming</div>
-  <a href="detail.html" class="detail-btn">📂 Lihat Semua Video</a>
-</div>
-
-<!-- PLAYER -->
 <div class="container">
   <video id="player" controls autoplay playsinline></video>
 
@@ -96,11 +51,12 @@ const id = params.get("id");
 
 async function loadVideo(){
   if(!id){
-    document.getElementById("title").innerText="Pilih video dari halaman detail";
+    document.getElementById("title").innerText="Video tidak ditemukan";
     return;
   }
 
   try{
+    // Ambil data
     const res = await fetch("/videos?id="+id,{cache:"no-store"});
     const data = await res.json();
 
@@ -120,7 +76,7 @@ async function loadVideo(){
     // Tambah view
     fetch("/videos?view="+id);
 
-    // Online realtime
+    // ONLINE FAKE REALTIME
     let online = Math.floor(Math.random()*40)+20;
     document.getElementById("online").innerText = online;
 
@@ -138,7 +94,7 @@ async function loadVideo(){
 loadVideo();
 </script>
 
-<!-- IKLAN -->
+<!-- IKLAN KAMU -->
 <script>
 (function(s){
   s.dataset.zone='9713245';
