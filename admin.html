@@ -21,6 +21,7 @@ button{width:100%;padding:12px;background:linear-gradient(135deg,#ff0055,#ff3c7d
 .download-row input{flex:1}
 .download-row button{width:42px}
 .preview-btn{background:#ff0055;padding:10px;border-radius:10px;margin-top:6px;text-align:center;font-weight:600}
+.thumb-preview{width:100%;border-radius:12px;margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -30,6 +31,9 @@ button{width:100%;padding:12px;background:linear-gradient(135deg,#ff0055,#ff3c7d
 
 <input id="titleInput" placeholder="Judul video">
 <input id="stream" placeholder="Link stream video">
+
+<div class="small">Upload Thumbnail</div>
+<input type="file" id="thumbFile" accept="image/*">
 
 <div class="small">Tombol Download</div>
 <div id="downloads"></div>
@@ -58,6 +62,20 @@ const $ = id => document.getElementById(id);
 
 let editIndex = null;
 let editId = null;
+let thumbnailData = null;
+
+// ===== CONVERT IMAGE TO BASE64 =====
+$('thumbFile').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    thumbnailData = reader.result;
+    renderPreview({title:$('titleInput').value, downloads:[], thumbnail:thumbnailData});
+  };
+  reader.readAsDataURL(file);
+});
 
 // ===== DOWNLOAD FIELD =====
 function addDownload(label='', url=''){
@@ -75,6 +93,7 @@ addDownload();
 function generate(){
   const title = $('titleInput').value.trim();
   const src = $('stream').value.trim();
+
   if(!title || !src) return alert('Lengkapi data');
 
   const downloads=[];
@@ -88,32 +107,38 @@ function generate(){
 
   if(!downloads.length) downloads.push({label:'Download', url:src});
 
-  // ===== KEEP ID WHEN EDIT =====
   const id = editId 
     ? editId 
     : 'vid_' + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
 
-  const data = { [id]: { title, src, downloads } };
+  const data = {
+    [id]: {
+      title,
+      src,
+      thumbnail: thumbnailData,
+      downloads
+    }
+  };
 
   $('json').value = JSON.stringify(data,null,2);
   $('link').value = location.origin + '/?v=' + id;
 
   renderPreview(data[id]);
 
-  // ===== SAVE TO KV =====
   fetch(API,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify(data)
   });
 
-  // ===== HISTORY =====
   let h = JSON.parse(localStorage.getItem('history')||'[]');
   editIndex !== null ? (h[editIndex] = data) : h.unshift(data);
   localStorage.setItem('history', JSON.stringify(h.slice(0,10)));
 
   editIndex = null;
   editId = null;
+  thumbnailData = null;
+  $('thumbFile').value = '';
 
   renderHistory();
 }
@@ -121,8 +146,9 @@ function generate(){
 // ===== PREVIEW =====
 function renderPreview(v){
   $('preview').innerHTML =
-    `<b>${v.title}</b>` +
-    v.downloads.map(d=>`<div class="preview-btn">${d.label}</div>`).join('');
+    (v.thumbnail ? `<img src="${v.thumbnail}" class="thumb-preview">` : '') +
+    `<b>${v.title || ''}</b>` +
+    (v.downloads || []).map(d=>`<div class="preview-btn">${d.label}</div>`).join('');
 }
 
 // ===== COPY =====
@@ -157,6 +183,7 @@ function editHistory(i){
 
   $('titleInput').value = v.title;
   $('stream').value = v.src;
+  thumbnailData = v.thumbnail || null;
 
   $('downloads').innerHTML = '';
   v.downloads.forEach(d=>addDownload(d.label,d.url));
