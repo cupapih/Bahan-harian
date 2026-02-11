@@ -3,24 +3,101 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Player</title>
+<title>Streaming Player</title>
 
 <style>
-body{margin:0;background:#0f172a;color:#fff;font-family:Arial}
-.container{max-width:900px;margin:40px auto;padding:20px}
+body{
+  margin:0;
+  background:#0b0f1a;
+  color:#fff;
+  font-family:Arial, sans-serif;
+}
+
+/* TOPBAR */
+.topbar{
+  background:#111827;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.logo{
+  font-size:18px;
+  font-weight:bold;
+}
+
+.detail-btn{
+  background:#2563eb;
+  padding:8px 14px;
+  border-radius:8px;
+  text-decoration:none;
+  color:#fff;
+  font-size:14px;
+  transition:.2s;
+}
+
+.detail-btn:hover{
+  background:#1d4ed8;
+}
+
+/* CONTAINER */
+.container{
+  max-width:1000px;
+  margin:30px auto;
+  padding:20px;
+}
+
+/* PLAYER BOX */
+.player-box{
+  background:#111827;
+  padding:15px;
+  border-radius:14px;
+}
+
 video{
   width:100%;
   background:#000;
   border-radius:12px;
 }
-h1{font-size:20px}
+
+h1{
+  margin:15px 0 8px;
+  font-size:22px;
+}
+
+.desc{
+  color:#9ca3af;
+  margin-bottom:10px;
+}
+
+.stats{
+  font-size:14px;
+  color:#9ca3af;
+}
 </style>
 </head>
 <body>
 
+<!-- TOP NAV -->
+<div class="topbar">
+  <div class="logo">🎬 My Streaming</div>
+  <a href="detail.html" class="detail-btn">📂 Semua Video</a>
+</div>
+
+<!-- CONTENT -->
 <div class="container">
-  <h1 id="title">Loading...</h1>
-  <video id="player" controls autoplay playsinline></video>
+  <div class="player-box">
+    <h1 id="title">Loading...</h1>
+    <video id="player" controls autoplay playsinline></video>
+
+    <div class="desc" id="desc"></div>
+
+    <div class="stats">
+      👁 <span id="views">0</span> views |
+      🔴 <span id="online">0</span> online
+    </div>
+  </div>
 </div>
 
 <script>
@@ -29,13 +106,12 @@ const id = new URLSearchParams(location.search).get("id");
 async function load(){
 
   if(!id){
-    document.getElementById("title").innerText="Video tidak ditemukan";
+    document.getElementById("title").innerText="Pilih video dari halaman detail";
     return;
   }
 
   const res = await fetch("/videos",{cache:"no-store"});
   const data = await res.json();
-
   const post = data[id];
 
   if(!post){
@@ -44,6 +120,7 @@ async function load(){
   }
 
   document.getElementById("title").innerText = post.title || "No Title";
+  document.getElementById("desc").innerText = post.description || "";
 
   const videoUrl = post.video || post.src || post.url;
 
@@ -53,12 +130,26 @@ async function load(){
   }
 
   document.getElementById("player").src = videoUrl;
+
+  // VIEW COUNTER
+  post.views = (post.views || 0) + 1;
+  document.getElementById("views").innerText = post.views;
+
+  // ONLINE RANDOM
+  let online = Math.floor(Math.random()*50)+20;
+  document.getElementById("online").innerText = online;
+
+  setInterval(()=>{
+    online += Math.floor(Math.random()*5)-2;
+    if(online < 10) online = 10;
+    document.getElementById("online").innerText = online;
+  },4000);
 }
 
 load();
 </script>
 
-<!-- IKLAN TARUH PALING BAWAH -->
+<!-- IKLAN -->
 <script>
 (function(s){
   s.dataset.zone='9713245';
