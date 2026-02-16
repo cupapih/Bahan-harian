@@ -75,6 +75,7 @@ video{
   display:flex;
   gap:10px;
   margin-top:12px;
+  flex-wrap:wrap;
 }
 .external-controls button{
   background:#2563eb;
@@ -114,9 +115,10 @@ h1{margin:15px 0 8px;font-size:22px;}
 
     <!-- KONTROL DI LUAR PLAYER -->
     <div class="external-controls">
+      <button id="rewindBtn">⏪ Mundur 10s</button>
       <button id="playBtn">▶ Play</button>
       <button id="pauseBtn">⏸ Pause</button>
-      <button id="skipBtn">⏭ Skip 10s</button>
+      <button id="skipBtn">⏭ Maju 10s</button>
     </div>
 
     <div class="desc" id="desc"></div>
@@ -207,6 +209,9 @@ load();
 document.getElementById("playBtn").onclick = () => player.play();
 document.getElementById("pauseBtn").onclick = () => player.pause();
 document.getElementById("skipBtn").onclick = () => player.currentTime += 10;
+document.getElementById("rewindBtn").onclick = () => {
+  player.currentTime = Math.max(0, player.currentTime - 10);
+};
 </script>
 
 <!-- POPUNDER KLIK -->
