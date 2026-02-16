@@ -69,6 +69,26 @@ video{
   background:#000;
   border-radius:12px;
 }
+
+/* KONTROL LUAR */
+.external-controls{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+}
+.external-controls button{
+  background:#2563eb;
+  border:none;
+  color:white;
+  padding:10px 16px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
+}
+.external-controls button:hover{
+  opacity:0.9;
+}
+
 h1{margin:15px 0 8px;font-size:22px;}
 .desc{color:#9ca3af;margin-bottom:10px;}
 .stats{font-size:14px;color:#9ca3af;}
@@ -88,8 +108,15 @@ h1{margin:15px 0 8px;font-size:22px;}
     <h1 id="title">Loading...</h1>
 
     <div class="player-wrapper">
-      <video id="player" controls playsinline></video>
+      <video id="player" playsinline></video>
       <div class="watermark">Harian Asupan</div>
+    </div>
+
+    <!-- KONTROL DI LUAR PLAYER -->
+    <div class="external-controls">
+      <button id="playBtn">▶ Play</button>
+      <button id="pauseBtn">⏸ Pause</button>
+      <button id="skipBtn">⏭ Skip 10s</button>
     </div>
 
     <div class="desc" id="desc"></div>
@@ -175,6 +202,11 @@ async function load(){
   }
 }
 load();
+
+/* KONTROL LUAR */
+document.getElementById("playBtn").onclick = () => player.play();
+document.getElementById("pauseBtn").onclick = () => player.pause();
+document.getElementById("skipBtn").onclick = () => player.currentTime += 10;
 </script>
 
 <!-- POPUNDER KLIK -->
