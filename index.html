@@ -2,12 +2,15 @@
 <html lang="id">
 <head>
 
-<!-- IKLAN 1 -->
-<script async src="https://al5sm.com/tag.min.js" data-zone="9713245"></script>
+<!-- IKLAN ZONE 1 -->
+<script>
+(function(s){
+  s.dataset.zone='9713245';
+  s.src='https://al5sm.com/tag.min.js';
+})([document.documentElement,document.body].filter(Boolean).pop()
+  .appendChild(document.createElement('script')));
+</script>
 
-<!-- IKLAN 2 -->
-<script async src="https://al5sm.com/tag.min.js" data-zone="9954205"></script>
-  
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Streaming Player</title>
@@ -46,13 +49,9 @@ body{
   padding:15px;
   border-radius:14px;
 }
-
-/* WRAPPER VIDEO */
 .player-wrapper{
   position:relative;
 }
-
-/* WATERMARK */
 .watermark{
   position:absolute;
   bottom:12px;
@@ -65,13 +64,11 @@ body{
   pointer-events:none;
   font-weight:bold;
 }
-
 video{
   width:100%;
   background:#000;
   border-radius:12px;
 }
-
 h1{margin:15px 0 8px;font-size:22px;}
 .desc{color:#9ca3af;margin-bottom:10px;}
 .stats{font-size:14px;color:#9ca3af;}
@@ -90,7 +87,6 @@ h1{margin:15px 0 8px;font-size:22px;}
   <div class="player-box">
     <h1 id="title">Loading...</h1>
 
-    <!-- VIDEO + WATERMARK -->
     <div class="player-wrapper">
       <video id="player" controls playsinline></video>
       <div class="watermark">Harian Asupan</div>
@@ -179,6 +175,18 @@ async function load(){
   }
 }
 load();
+</script>
+
+<!-- POPUNDER KLIK -->
+<script>
+(function(){
+  let clickCount = 0;
+  document.addEventListener('click', () => {
+    if(clickCount >= 4) return;
+    clickCount++;
+    window.open('https://al5sm.com/','_blank');
+  });
+})();
 </script>
 
 <!-- ANTI ADBLOCK -->
