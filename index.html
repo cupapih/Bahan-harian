@@ -16,84 +16,22 @@
 <title>Streaming Player</title>
 
 <style>
-body{
-  margin:0;
-  background:#0b0f1a;
-  color:#fff;
-  font-family:Arial, sans-serif;
-}
-.topbar{
-  background:#111827;
-  padding:15px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.logo{font-size:18px;font-weight:bold;}
-.detail-btn{
-  background:#2563eb;
-  padding:8px 14px;
-  border-radius:8px;
-  text-decoration:none;
-  color:#fff;
-  font-size:14px;
-}
-.container{
-  max-width:1000px;
-  width:95%;
-  margin:30px auto;
-  padding:20px;
-}
-.player-box{
-  background:#111827;
-  padding:15px;
-  border-radius:14px;
-}
-.player-wrapper{
-  position:relative;
-}
-.watermark{
-  position:absolute;
-  bottom:12px;
-  right:12px;
-  background:rgba(0,0,0,0.5);
-  padding:6px 10px;
-  border-radius:6px;
-  font-size:12px;
-  color:white;
-  pointer-events:none;
-  font-weight:bold;
-}
-video{
-  width:100%;
-  background:#000;
-  border-radius:12px;
-}
-
-/* KONTROL LUAR */
-.external-controls{
-  display:flex;
-  gap:10px;
-  margin-top:12px;
-  flex-wrap:wrap;
-}
-.external-controls button{
-  background:#2563eb;
-  border:none;
-  color:white;
-  padding:10px 16px;
-  border-radius:8px;
-  cursor:pointer;
-  font-size:14px;
-}
-.external-controls button:hover{
-  opacity:0.9;
-}
-
-h1{margin:15px 0 8px;font-size:22px;}
-.desc{color:#9ca3af;margin-bottom:10px;}
-.stats{font-size:14px;color:#9ca3af;}
-.loading{text-align:center;padding:40px;color:#9ca3af;}
+body{margin:0;background:#0b0f1a;color:#fff;font-family:Arial,sans-serif}
+.topbar{background:#111827;padding:15px 20px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:18px;font-weight:bold}
+.detail-btn{background:#2563eb;padding:8px 14px;border-radius:8px;text-decoration:none;color:#fff;font-size:14px}
+.container{max-width:1000px;width:95%;margin:30px auto;padding:20px}
+.player-box{background:#111827;padding:15px;border-radius:14px}
+.player-wrapper{position:relative}
+.watermark{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.5);padding:6px 10px;border-radius:6px;font-size:12px;color:white;pointer-events:none;font-weight:bold}
+video{width:100%;background:#000;border-radius:12px}
+.external-controls{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.external-controls button{background:#2563eb;border:none;color:white;padding:10px 16px;border-radius:8px;cursor:pointer;font-size:14px}
+.external-controls button:hover{opacity:.9}
+h1{margin:15px 0 8px;font-size:22px}
+.desc{color:#9ca3af;margin-bottom:10px}
+.stats{font-size:14px;color:#9ca3af}
+.loading{text-align:center;padding:40px;color:#9ca3af}
 </style>
 </head>
 
@@ -113,7 +51,6 @@ h1{margin:15px 0 8px;font-size:22px;}
       <div class="watermark">Harian Asupan</div>
     </div>
 
-    <!-- KONTROL DI LUAR PLAYER -->
     <div class="external-controls">
       <button id="rewindBtn">⏪ Mundur 10s</button>
       <button id="playBtn">▶ Play</button>
@@ -133,151 +70,78 @@ h1{margin:15px 0 8px;font-size:22px;}
 </div>
 
 <script>
-const id = new URLSearchParams(location.search).get("id");
-const player = document.getElementById("player");
-const titleEl = document.getElementById("title");
-const descEl = document.getElementById("desc");
-const viewsEl = document.getElementById("views");
-const onlineEl = document.getElementById("online");
-const msgEl = document.getElementById("msg");
+const id=new URLSearchParams(location.search).get("id");
+const player=document.getElementById("player");
+const titleEl=document.getElementById("title");
+const descEl=document.getElementById("desc");
+const viewsEl=document.getElementById("views");
+const onlineEl=document.getElementById("online");
+const msgEl=document.getElementById("msg");
 
 async function load(){
-  if(!id){
-    titleEl.innerText = "Pilih video dari halaman detail";
-    return;
-  }
+ if(!id){titleEl.innerText="Pilih video dari halaman detail";return;}
+ try{
+  msgEl.innerText="Memuat video...";
+  const res=await fetch("/videos",{cache:"no-store"});
+  const data=await res.json();
+  const post=data[id];
 
-  try{
-    msgEl.innerText = "Memuat video...";
+  if(!post){titleEl.innerText="Video tidak ditemukan";msgEl.innerText="";return;}
 
-    const res = await fetch("/videos",{cache:"no-store"});
-    const data = await res.json();
-    const post = data[id];
+  titleEl.innerText=post.title||"No Title";
+  descEl.innerText=post.description||"";
+  player.src=(post.video||post.src||post.url)+"#t=0.1";
 
-    if(!post){
-      titleEl.innerText = "Video tidak ditemukan";
-      msgEl.innerText = "";
-      return;
-    }
+  const key="views_"+id;
+  let views=localStorage.getItem(key)||0;
+  views++;localStorage.setItem(key,views);viewsEl.innerText=views;
 
-    titleEl.innerText = post.title || "No Title";
-    descEl.innerText = post.description || "";
+  let online=Math.floor(Math.random()*50)+20;
+  onlineEl.innerText=online;
+  setInterval(()=>{
+    online+=Math.floor(Math.random()*5)-2;
+    if(online<10)online=10;
+    onlineEl.innerText=online;
+  },4000);
 
-    const videoUrl = post.video || post.src || post.url;
-    player.src = videoUrl + "#t=0.1";
-
-    const key = "views_" + id;
-    let views = localStorage.getItem(key) || 0;
-    views++;
-    localStorage.setItem(key, views);
-    viewsEl.innerText = views;
-
-    const timeKey = "time_" + id;
-    const savedTime = localStorage.getItem(timeKey);
-    if(savedTime) player.currentTime = savedTime;
-
-    player.addEventListener("timeupdate", () => {
-      localStorage.setItem(timeKey, player.currentTime);
-    });
-
-    player.addEventListener("loadeddata", () => {
-      msgEl.innerText = "";
-    });
-
-    player.onerror = () => {
-      titleEl.innerText = "Video gagal diputar";
-      msgEl.innerText = "";
-    };
-
-    let online = Math.floor(Math.random()*50)+20;
-    onlineEl.innerText = online;
-
-    setInterval(()=>{
-      online += Math.floor(Math.random()*5)-2;
-      if(online < 10) online = 10;
-      onlineEl.innerText = online;
-    },4000);
-
-  }catch(e){
-    titleEl.innerText = "Gagal memuat data";
-    msgEl.innerText = "";
-  }
+  msgEl.innerText="";
+ }catch(e){
+  titleEl.innerText="Gagal memuat data";
+ }
 }
 load();
 
-/* KONTROL LUAR */
-document.getElementById("playBtn").onclick = () => player.play();
-document.getElementById("pauseBtn").onclick = () => player.pause();
-document.getElementById("skipBtn").onclick = () => player.currentTime += 10;
-document.getElementById("rewindBtn").onclick = () => {
-  player.currentTime = Math.max(0, player.currentTime - 10);
-};
+playBtn.onclick=()=>player.play();
+pauseBtn.onclick=()=>player.pause();
+skipBtn.onclick=()=>player.currentTime+=10;
+rewindBtn.onclick=()=>player.currentTime=Math.max(0,player.currentTime-10);
 </script>
 
-<!-- POPUNDER KLIK -->
+<!-- ✅ POPUNDER FINAL + ANTI BLOCKER -->
 <script>
 (function(){
-  let clickCount = 0;
-  document.addEventListener('click', () => {
-    if(clickCount >= 4) return;
-    clickCount++;
-    window.open('https://al5sm.com/','_blank');
-  });
-})();
-</script>
 
-<!-- ANTI ADBLOCK -->
-<script>
-function detectAdBlock() {
-  let bait = document.createElement("div");
-  bait.className = "adsbox";
-  bait.style.height = "1px";
-  document.body.appendChild(bait);
+ let clickCount=0;
+ const MAX_ADS=4;
 
-  setTimeout(() => {
-    if (bait.offsetHeight === 0) {
-      showAdblockWarning();
+ function openAd(){
+  setTimeout(()=>{
+    const newTab=window.open("https://al5sm.com/","_blank");
+    if(newTab){
+      newTab.blur();
+      window.focus();
     }
-    bait.remove();
-  }, 100);
-}
+  },120);
+ }
 
-function showAdblockWarning() {
-  document.body.innerHTML = `
-    <div style="
-      position:fixed;
-      top:0;left:0;
-      width:100%;
-      height:100%;
-      background:#0b0f1a;
-      color:white;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      font-family:Arial;
-      z-index:99999;
-      padding:20px;
-    ">
-      <div>
-        <h2>🚫 AdBlock Terdeteksi</h2>
-        <p>Matikan AdBlock untuk menonton video.</p>
-        <button onclick="location.reload()" style="
-          margin-top:15px;
-          padding:10px 20px;
-          background:#2563eb;
-          border:none;
-          color:white;
-          border-radius:8px;
-          cursor:pointer;
-        ">
-          Saya Sudah Matikan
-        </button>
-      </div>
-    </div>
-  `;
-}
-window.addEventListener("load", detectAdBlock);
+ document.addEventListener("click",function(e){
+   if(e.target.closest("a")) return;
+   if(clickCount>=MAX_ADS) return;
+   clickCount++;
+   openAd();
+ },true);
+
+})();
 </script>
 
 </body>
