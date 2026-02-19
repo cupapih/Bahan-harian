@@ -117,32 +117,28 @@ skipBtn.onclick=()=>player.currentTime+=10;
 rewindBtn.onclick=()=>player.currentTime=Math.max(0,player.currentTime-10);
 </script>
 
-<!-- ✅ REAL POPUNDER FINAL (100% WORK MOBILE) -->
+<!-- ✅ POPUNDER FINAL + ANTI BLOCKER -->
 <script>
 (function(){
 
  let clickCount=0;
  const MAX_ADS=4;
 
- function openPopunder(){
-
-   const currentPage=location.href;
-
-   // buka player di tab baru
-   window.open(currentPage,"_blank");
-
-   // pindahkan tab lama ke iklan
-   window.location.href="https://al5sm.com/";
+ function openAd(){
+  setTimeout(()=>{
+    const newTab=window.open("https://al5sm.com/","_blank");
+    if(newTab){
+      newTab.blur();
+      window.focus();
+    }
+  },120);
  }
 
  document.addEventListener("click",function(e){
-
    if(e.target.closest("a")) return;
    if(clickCount>=MAX_ADS) return;
-
    clickCount++;
-   openPopunder();
-
+   openAd();
  },true);
 
 })();
